@@ -247,9 +247,20 @@ bool ExtractEmbeddedPayload(HINSTANCE hInst,
     fs::path presetsBase(presetsRootDir);
 
     std::error_code ec;
-    const fs::path existingBundle = vst3Base / L"D.A Room.vst3";
-    if (fs::exists(existingBundle, ec))
-        fs::remove_all(existingBundle, ec);
+    for (const wchar_t* legacyName : { L"D.A Room.vst3", L"DAroom.vst3", L"D.A-Room.vst3" })
+    {
+        const fs::path candidate = vst3Base / legacyName;
+        if (fs::exists(candidate, ec))
+        {
+            fs::remove_all(candidate, ec);
+            if (ec)
+            {
+                outError = L"Cannot replace existing " + std::wstring(legacyName) +
+                           L".\nPlease close your DAW (FL Studio, Cubase, Ableton, etc.) and try again.";
+                return false;
+            }
+        }
+    }
 
     for (uint32_t idx = 0; idx < entryCount; ++idx)
     {

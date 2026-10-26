@@ -72,6 +72,24 @@ target_link_libraries(DAroom PRIVATE
 )
 
 # -----------------------------------------------------------------------------
+# Automated GUI Render Verification Target (Windows & macOS CI)
+# -----------------------------------------------------------------------------
+add_executable(VerifyPluginGUI
+    Tests/VerifyPluginGUI.cpp
+)
+target_include_directories(VerifyPluginGUI PRIVATE
+    $<TARGET_PROPERTY:DAroom,INCLUDE_DIRECTORIES>
+    "${CMAKE_CURRENT_SOURCE_DIR}/Source"
+)
+target_compile_definitions(VerifyPluginGUI PRIVATE
+    $<TARGET_PROPERTY:DAroom,COMPILE_DEFINITIONS>
+)
+target_link_libraries(VerifyPluginGUI PRIVATE
+    DAroom
+    DAroomAssets
+)
+
+# -----------------------------------------------------------------------------
 # Native Windows 64-bit Custom GUI Installer (.EXE -> C:\Program Files\Common Files\VST3)
 # -----------------------------------------------------------------------------
 if(WIN32 AND TARGET DAroom_VST3)

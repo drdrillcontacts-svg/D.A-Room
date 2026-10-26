@@ -17,15 +17,15 @@ void DARoomLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w
     const float minDim = static_cast<float> (juce::jmin (w, h));
     const float cx = static_cast<float> (x) + static_cast<float> (w) * 0.5f;
     const float cy = static_cast<float> (y) + static_cast<float> (h) * 0.5f;
-    const float outerR = minDim * 0.49f;
+    const float outerR = minDim * 0.495f;
 
-    // Cover static baked-in knob artwork cleanly with dark recessed bezel
+    // Cover static baked-in knob artwork cleanly inside the recessed bezel
     const auto outerBounds = juce::Rectangle<float> (cx - outerR, cy - outerR, outerR * 2.0f, outerR * 2.0f);
     g.setColour (juce::Colour (0xff050c12));
     g.fillEllipse (outerBounds);
 
-    const float arcR = outerR * 0.89f;
-    const float capR = outerR * 0.76f;
+    const float arcR = outerR * 0.885f;
+    const float capR = outerR * 0.755f;
     const float angle = start + pos * (end - start);
 
     // Subtle unlit track arc
@@ -192,11 +192,55 @@ void DARoomLookAndFeel::drawButtonText (juce::Graphics& g, juce::TextButton& but
     g.drawFittedText (button.getButtonText(), bounds.reduced (4, 2), juce::Justification::centred, 1);
 }
 
+juce::Image DARoomAudioProcessorEditor::loadSoftwareARGBImage (const void* data, size_t sizeBytes)
+{
+    if (data == nullptr || sizeBytes == 0)
+        return {};
+
+    juce::MemoryInputStream memStream (data, sizeBytes, false);
+    juce::PNGImageFormat pngFormat;
+    juce::Image decoded = pngFormat.decodeImage (memStream);
+
+    if (! decoded.isValid())
+        decoded = juce::ImageFileFormat::loadFrom (data, sizeBytes);
+
+    if (! decoded.isValid())
+        return {};
+
+    const int w = decoded.getWidth();
+    const int h = decoded.getHeight();
+    if (w <= 0 || h <= 0)
+        return {};
+
+    // Copy explicitly into CPU-backed SoftwareImageType (Image::ARGB, opaque alpha = 0xff)
+    // so rendering never depends on pre-HWND Direct2D/DXGI GPU textures on Windows.
+    juce::Image softImg (juce::Image::ARGB, w, h, true, juce::SoftwareImageType{});
+    {
+        const juce::Image::BitmapData src (decoded, juce::Image::BitmapData::readOnly);
+        const juce::Image::BitmapData dst (softImg, juce::Image::BitmapData::readWrite);
+
+        for (int y = 0; y < h; ++y)
+        {
+            auto* dLine = dst.getLinePointer (y);
+            for (int x = 0; x < w; ++x)
+            {
+                const auto col = src.getPixelColour (x, y);
+                reinterpret_cast<juce::PixelARGB*> (dLine + x * dst.pixelStride)
+                    ->setARGB (0xff, col.getRed(), col.getGreen(), col.getBlue());
+            }
+        }
+    }
+
+    return softImg;
+}
+
 DARoomAudioProcessorEditor::DARoomAudioProcessorEditor (DARoomAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
+    setOpaque (true);
     setLookAndFeel (&customLookAndFeel);
-    background = juce::ImageFileFormat::loadFrom (BinaryData::DAroom_GUI_png, BinaryData::DAroom_GUI_pngSize);
+    background = loadSoftwareARGBImage (BinaryData::DAroom_GUI_png,
+                                        static_cast<size_t> (BinaryData::DAroom_GUI_pngSize));
 
     const juce::StringArray tooltips {
         "Mix", "Predelay", "Decay", "Size",
@@ -303,6 +347,7 @@ DARoomAudioProcessorEditor::DARoomAudioProcessorEditor (DARoomAudioProcessor& p)
         c->setFixedAspectRatio (static_cast<double> (referenceWidth) / static_cast<double> (referenceHeight));
     setSize (1015, 388);
 
+    enforceSoftwareRendererOnWindows();
     syncUIFromProcessor();
     startTimerHz (30);
 }
@@ -320,6 +365,79 @@ DARoomAudioProcessorEditor::~DARoomAudioProcessorEditor()
     lowCutTrackSlider.setLookAndFeel (nullptr);
     highCutTrackSlider.setLookAndFeel (nullptr);
     setLookAndFeel (nullptr);
+}
+
+void DARoomAudioProcessorEditor::parentHierarchyChanged()
+{
+    AudioProcessorEditor::parentHierarchyChanged();
+    enforceSoftwareRendererOnWindows();
+}
+
+void DARoomAudioProcessorEditor::visibilityChanged()
+{
+    AudioProcessorEditor::visibilityChanged();
+    enforceSoftwareRendererOnWindows();
+}
+
+void DARoomAudioProcessorEditor::enforceSoftwareRendererOnWindows()
+{
+   #if JUCE_WINDOWS
+    // JUCE 8.0.6 defaults Windows peers to engine 1 (Direct2D / DirectComposition), which can
+    // fail to render large bitmaps inside DAW child HWNDs or hybrid multi-GPU configurations.
+    // Engine 0 is JUCE's rock-solid GDI DIBSection Software Renderer.
+    if (auto* peer = getPeer())
+    {
+        if (peer->getCurrentRenderingEngine() != 0)
+        {
+            peer->setCurrentRenderingEngine (0);
+            repaint();
+        }
+    }
+   #endif
+}
+
+void DARoomAudioProcessorEditor::ensureScaledBackground()
+{
+    if (! background.isValid())
+        return;
+
+    const int targetW = getWidth();
+    const int targetH = getHeight();
+    if (targetW <= 0 || targetH <= 0)
+        return;
+
+    if (scaledBackground.isValid()
+        && scaledBackground.getWidth() == targetW
+        && scaledBackground.getHeight() == targetH)
+    {
+        return;
+    }
+
+    juce::Image scaled (juce::Image::ARGB, targetW, targetH, true, juce::SoftwareImageType{});
+    {
+        juce::Graphics sg (scaled);
+        sg.fillAll (juce::Colour (0xff050c12));
+        sg.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+        sg.drawImage (background, juce::Rectangle<float> (0.0f, 0.0f,
+                                                          static_cast<float> (targetW),
+                                                          static_cast<float> (targetH)));
+    }
+
+    // Guarantee opaque alpha = 0xff across every resampled pixel
+    {
+        const juce::Image::BitmapData dst (scaled, juce::Image::BitmapData::readWrite);
+        for (int y = 0; y < targetH; ++y)
+        {
+            auto* dLine = dst.getLinePointer (y);
+            for (int x = 0; x < targetW; ++x)
+            {
+                auto* px = reinterpret_cast<juce::PixelARGB*> (dLine + x * dst.pixelStride);
+                px->setARGB (0xff, px->getRed(), px->getGreen(), px->getBlue());
+            }
+        }
+    }
+
+    scaledBackground = scaled;
 }
 
 juce::Rectangle<int> DARoomAudioProcessorEditor::scaledBounds (float x, float y, float w, float h) const
@@ -343,6 +461,7 @@ juce::Rectangle<float> DARoomAudioProcessorEditor::scaledFloatBounds (float x, f
 
 void DARoomAudioProcessorEditor::timerCallback()
 {
+    enforceSoftwareRendererOnWindows();
     syncUIFromProcessor();
 }
 
@@ -541,17 +660,18 @@ void DARoomAudioProcessorEditor::updateValueLabels()
 
 void DARoomAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    if (background.isValid())
+    g.fillAll (juce::Colour (0xff050c12));
+    ensureScaledBackground();
+
+    if (scaledBackground.isValid())
     {
-        g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
-        g.drawImage (background, getLocalBounds().toFloat());
+        g.setOpacity (1.0f);
+        g.drawImageAt (scaledBackground, 0, 0);
     }
-    else
+    else if (background.isValid())
     {
-        g.fillAll (juce::Colour (0xff061018));
-        g.setColour (juce::Colour (0xffb5eaff));
-        g.setFont (juce::Font (juce::FontOptions (22.0f)));
-        g.drawText ("D.A Room", 20, 8, 240, 36, juce::Justification::left);
+        g.setOpacity (1.0f);
+        g.drawImage (background, getLocalBounds().toFloat());
     }
 
     // Cover baked-in value readouts at exact measured reference coordinates
@@ -577,8 +697,8 @@ void DARoomAudioProcessorEditor::paint (juce::Graphics& g)
     }
 
     // Cover baked-in CHAMBER bottom glow & render live mode pill + dynamic cyan underline glow
-    g.setColour (juce::Colour (0xf2040a10));
-    g.fillRoundedRectangle (scaledFloatBounds (1070.0f, 528.0f, 235.0f, 24.0f), 4.0f);
+    g.setColour (juce::Colour (0xf4040a10));
+    g.fillRoundedRectangle (scaledFloatBounds (1055.0f, 528.0f, 265.0f, 28.0f), 4.0f);
 
     const auto pillRect = scaledFloatBounds (556.0f, 466.0f, 918.0f, 70.0f);
     g.setColour (juce::Colour (0xec050e16));
@@ -609,17 +729,19 @@ void DARoomAudioProcessorEditor::paint (juce::Graphics& g)
 
 void DARoomAudioProcessorEditor::resized()
 {
+    ensureScaledBackground();
+
     static constexpr float knobRefs[10][4] = {
-        {   66.0f, 225.0f, 160.0f, 160.0f }, // MIX
-        {  304.0f, 225.0f, 160.0f, 160.0f }, // PREDELAY
-        { 1570.0f, 225.0f, 160.0f, 160.0f }, // DECAY
-        { 1802.0f, 225.0f, 160.0f, 160.0f }, // SIZE
-        {   70.0f, 563.0f, 116.0f, 116.0f }, // DIFFUSION
-        {  384.0f, 563.0f, 116.0f, 116.0f }, // MODULATION
-        {  682.0f, 563.0f, 116.0f, 116.0f }, // DAMPING
-        {  981.0f, 563.0f, 116.0f, 116.0f }, // WIDTH
-        { 1282.0f, 577.0f,  88.0f,  88.0f }, // LOW CUT KNOB
-        { 1636.0f, 577.0f,  88.0f,  88.0f }  // HIGH CUT KNOB
+        {   63.0f, 222.0f, 166.0f, 166.0f }, // MIX
+        {  301.0f, 222.0f, 166.0f, 166.0f }, // PREDELAY
+        { 1567.0f, 222.0f, 166.0f, 166.0f }, // DECAY
+        { 1799.0f, 222.0f, 166.0f, 166.0f }, // SIZE
+        {   67.0f, 560.0f, 122.0f, 122.0f }, // DIFFUSION
+        {  381.0f, 560.0f, 122.0f, 122.0f }, // MODULATION
+        {  679.0f, 560.0f, 122.0f, 122.0f }, // WIDTH/DAMPING
+        {  978.0f, 560.0f, 122.0f, 122.0f }, // WIDTH
+        { 1280.0f, 575.0f,  92.0f,  92.0f }, // LOW CUT KNOB
+        { 1634.0f, 575.0f,  92.0f,  92.0f }  // HIGH CUT KNOB
     };
 
     for (size_t i = 0; i < 10; ++i)

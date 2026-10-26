@@ -34,10 +34,16 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
+    void parentHierarchyChanged() override;
+    void visibilityChanged() override;
 
 private:
     static constexpr int referenceWidth = 2030;
     static constexpr int referenceHeight = 775;
+
+    static juce::Image loadSoftwareARGBImage (const void* data, size_t sizeBytes);
+    void enforceSoftwareRendererOnWindows();
+    void ensureScaledBackground();
 
     void timerCallback() override;
     void syncUIFromProcessor();
@@ -55,6 +61,7 @@ private:
 
     DARoomAudioProcessor& audioProcessor;
     juce::Image background;
+    juce::Image scaledBackground;
     DARoomLookAndFeel customLookAndFeel;
 
     // 10 rotary knobs (4 main + 4 bottom + 2 filter knobs) + 2 linear filter track sliders

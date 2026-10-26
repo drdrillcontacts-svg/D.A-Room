@@ -31,10 +31,10 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release 2>&1 | tee configure.log
 
-      - name: Build AU and VST3
+      - name: Build AU, VST3 & GUI Verifier
         run: |
           set +e
-          cmake --build build --config Release --target DAroom_AU DAroom_VST3 --parallel 3 > build.log 2>&1
+          cmake --build build --config Release --target DAroom_AU DAroom_VST3 VerifyPluginGUI --parallel 3 > build.log 2>&1
           CODE=$?
           if [ $CODE -ne 0 ]; then
             ERR_MSG=$(tail -n 80 build.log | python3 -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
@@ -43,6 +43,12 @@ jobs:
             exit $CODE
           fi
           cat build.log
+
+      - name: Verify Plugin GUI Rendering on macOS
+        run: |
+          mkdir -p pkg_mac
+          ./build/VerifyPluginGUI "pkg_mac/plugin_gui_macos.png"
+          ls -lh "pkg_mac/plugin_gui_macos.png"
 
       - name: CodeSign & Validate macOS AU with auval
         run: |
@@ -65,18 +71,21 @@ jobs:
           fi
           exit 0
 
-      - name: Package macOS AU & Publish Artifact Blob
+      - name: Package macOS AU & Publish Artifact Blobs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          mkdir -p pkg_mac
           ditto -c -k --sequesterRsrc --keepParent "build/DAroom_artefacts/Release/AU/D.A Room.component" "pkg_mac/D.A_Room_macOS_AU.zip"
           ditto -c -k --sequesterRsrc --keepParent "build/DAroom_artefacts/Release/VST3/D.A Room.vst3" "pkg_mac/D.A_Room_macOS_VST3.zip"
           ls -lh pkg_mac/
-          python3 -c "import base64,json,sys; b=base64.b64encode(open(sys.argv[1],'rb').read()).decode(); json.dump({'encoding':'base64','content':b},open('blob_au.json','w'))" "pkg_mac/D.A_Room_macOS_AU.zip"
-          SHA_AU=$(gh api "repos/${GITHUB_REPOSITORY}/git/blobs" --input blob_au.json --jq .sha)
-          echo "::notice title=BLOB_MACOS_AU::${SHA_AU}"
-          rm -f blob_au.json
+          for pair in "BLOB_MACOS_AU:pkg_mac/D.A_Room_macOS_AU.zip" "BLOB_MACOS_GUI:pkg_mac/plugin_gui_macos.png"; do
+            TITLE="${pair%%:*}"
+            FILE="${pair#*:}"
+            python3 -c "import base64,json,sys; b=base64.b64encode(open(sys.argv[1],'rb').read()).decode(); json.dump({'encoding':'base64','content':b},open('blob_mac.json','w'))" "$FILE"
+            SHA=$(gh api "repos/${GITHUB_REPOSITORY}/git/blobs" --input blob_mac.json --jq .sha)
+            echo "::notice title=${TITLE}::${SHA}"
+          done
+          rm -f blob_mac.json
 
       - name: Upload macOS Plugins
         uses: actions/upload-artifact@v4
@@ -98,11 +107,11 @@ jobs:
         run: |
           cmake -S . -B build -A x64 2>&1 | tee configure.log
 
-      - name: Build Windows x64 VST3 & Custom EXE Installer
+      - name: Build Windows x64 VST3, Custom EXE Installer & GUI Verifier
         shell: bash
         run: |
           set +e
-          cmake --build build --config Release --target DAroom_VST3 DA_Production_Installer --parallel > build.log 2>&1
+          cmake --build build --config Release --target DAroom_VST3 DA_Production_Installer VerifyPluginGUI --parallel > build.log 2>&1
           CODE=$?
           if [ $CODE -ne 0 ]; then
             ERR_MSG=$(tail -n 90 build.log | python -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
@@ -112,14 +121,21 @@ jobs:
           fi
           cat build.log
 
-      - name: Verify EXE Installer (Silent Install to C:\Program Files\Common Files\VST3 + UI Screenshots)
+      - name: Verify Plugin GUI Rendering & EXE Installer on Windows
         shell: bash
         run: |
+          mkdir -p win_out/screenshots
+
+          VERIFY_EXE=$(find build -name "VerifyPluginGUI.exe" | head -n 1)
+          echo "Running GUI verifier: $VERIFY_EXE"
+          MSYS_NO_PATHCONV=1 "$VERIFY_EXE" "win_out/screenshots/plugin_gui_windows.png" 2>&1 | tee gui_verify.log
+          GUI_MSG=$(cat gui_verify.log | python -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
+          echo "::notice title=WIN_GUI_VERIFIED::${GUI_MSG}"
+
           INSTALLER_EXE=$(find build -name "D.A Production Installer.exe" | head -n 1)
           echo "Found installer: $INSTALLER_EXE"
           ls -lh "$INSTALLER_EXE"
 
-          mkdir -p win_out/screenshots
           MSYS_NO_PATHCONV=1 "$INSTALLER_EXE" --screenshot "win_out/screenshots"
           ls -lh win_out/screenshots/
 
