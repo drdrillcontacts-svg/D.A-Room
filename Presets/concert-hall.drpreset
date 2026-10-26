@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Concert Hall",
+  "parameters": {
+    "mix": 25,
+    "predelay_ms": 24,
+    "decay_seconds": 3.2,
+    "size_percent": 75,
+    "mode": "Hall",
+    "diffusion_percent": 84,
+    "modulation_percent": 18,
+    "damping_percent": 42,
+    "width_percent": 88,
+    "low_cut_hz": 80,
+    "high_cut_hz": 15500
+  }
+}

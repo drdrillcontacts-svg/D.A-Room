@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Endless Horizon",
+  "parameters": {
+    "mix": 30,
+    "predelay_ms": 50,
+    "decay_seconds": 12.0,
+    "size_percent": 100,
+    "mode": "Ambience",
+    "diffusion_percent": 94,
+    "modulation_percent": 26,
+    "damping_percent": 68,
+    "width_percent": 100,
+    "low_cut_hz": 70,
+    "high_cut_hz": 11500
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Orchestral Depth",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 26,
+    "decay_seconds": 4.6,
+    "size_percent": 84,
+    "mode": "Hall",
+    "diffusion_percent": 88,
+    "modulation_percent": 20,
+    "damping_percent": 52,
+    "width_percent": 92,
+    "low_cut_hz": 70,
+    "high_cut_hz": 14500
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Cosmic Drift",
+  "parameters": {
+    "mix": 28,
+    "predelay_ms": 42,
+    "decay_seconds": 10.0,
+    "size_percent": 100,
+    "mode": "Ambience",
+    "diffusion_percent": 92,
+    "modulation_percent": 36,
+    "damping_percent": 52,
+    "width_percent": 100,
+    "low_cut_hz": 80,
+    "high_cut_hz": 13000
+  }
+}

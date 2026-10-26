@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Dark Chamber",
+  "parameters": {
+    "mix": 20,
+    "predelay_ms": 16,
+    "decay_seconds": 3.2,
+    "size_percent": 64,
+    "mode": "Chamber",
+    "diffusion_percent": 84,
+    "modulation_percent": 8,
+    "damping_percent": 78,
+    "width_percent": 82,
+    "low_cut_hz": 140,
+    "high_cut_hz": 9000
+  }
+}

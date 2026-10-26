@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Piano Hall",
+  "parameters": {
+    "mix": 18,
+    "predelay_ms": 22,
+    "decay_seconds": 3.1,
+    "size_percent": 70,
+    "mode": "Hall",
+    "diffusion_percent": 82,
+    "modulation_percent": 10,
+    "damping_percent": 38,
+    "width_percent": 82,
+    "low_cut_hz": 80,
+    "high_cut_hz": 16000
+  }
+}

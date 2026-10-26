@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Frozen Air",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 28,
+    "decay_seconds": 5.8,
+    "size_percent": 86,
+    "mode": "Ambience",
+    "diffusion_percent": 94,
+    "modulation_percent": 20,
+    "damping_percent": 72,
+    "width_percent": 90,
+    "low_cut_hz": 180,
+    "high_cut_hz": 10500
+  }
+}

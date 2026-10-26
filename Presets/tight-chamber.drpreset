@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Tight Chamber",
+  "parameters": {
+    "mix": 16,
+    "predelay_ms": 10,
+    "decay_seconds": 1.5,
+    "size_percent": 45,
+    "mode": "Chamber",
+    "diffusion_percent": 74,
+    "modulation_percent": 12,
+    "damping_percent": 58,
+    "width_percent": 68,
+    "low_cut_hz": 100,
+    "high_cut_hz": 14000
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Wide Chamber",
+  "parameters": {
+    "mix": 28,
+    "predelay_ms": 24,
+    "decay_seconds": 4.2,
+    "size_percent": 82,
+    "mode": "Chamber",
+    "diffusion_percent": 88,
+    "modulation_percent": 32,
+    "damping_percent": 45,
+    "width_percent": 100,
+    "low_cut_hz": 100,
+    "high_cut_hz": 14500
+  }
+}

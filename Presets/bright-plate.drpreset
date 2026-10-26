@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Bright Plate",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 8,
+    "decay_seconds": 2.6,
+    "size_percent": 65,
+    "mode": "Plate",
+    "diffusion_percent": 76,
+    "modulation_percent": 30,
+    "damping_percent": 25,
+    "width_percent": 82,
+    "low_cut_hz": 150,
+    "high_cut_hz": 18000
+  }
+}

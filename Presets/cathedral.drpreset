@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Cathedral",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 35,
+    "decay_seconds": 7.5,
+    "size_percent": 92,
+    "mode": "Hall",
+    "diffusion_percent": 90,
+    "modulation_percent": 16,
+    "damping_percent": 68,
+    "width_percent": 92,
+    "low_cut_hz": 90,
+    "high_cut_hz": 10000
+  }
+}

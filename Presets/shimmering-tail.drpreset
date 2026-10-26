@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Shimmering Tail",
+  "parameters": {
+    "mix": 26,
+    "predelay_ms": 22,
+    "decay_seconds": 6.4,
+    "size_percent": 92,
+    "mode": "Ambience",
+    "diffusion_percent": 90,
+    "modulation_percent": 38,
+    "damping_percent": 28,
+    "width_percent": 96,
+    "low_cut_hz": 120,
+    "high_cut_hz": 18000
+  }
+}

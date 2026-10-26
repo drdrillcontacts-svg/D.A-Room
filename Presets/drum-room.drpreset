@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Drum Room",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 4,
+    "decay_seconds": 0.85,
+    "size_percent": 52,
+    "mode": "Room",
+    "diffusion_percent": 82,
+    "modulation_percent": 22,
+    "damping_percent": 48,
+    "width_percent": 80,
+    "low_cut_hz": 70,
+    "high_cut_hz": 17000
+  }
+}

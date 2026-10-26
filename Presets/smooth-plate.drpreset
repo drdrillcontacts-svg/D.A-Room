@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Smooth Plate",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 16,
+    "decay_seconds": 2.4,
+    "size_percent": 60,
+    "mode": "Plate",
+    "diffusion_percent": 88,
+    "modulation_percent": 12,
+    "damping_percent": 58,
+    "width_percent": 86,
+    "low_cut_hz": 130,
+    "high_cut_hz": 12500
+  }
+}

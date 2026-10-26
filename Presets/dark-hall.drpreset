@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Dark Hall",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 20,
+    "decay_seconds": 4.2,
+    "size_percent": 78,
+    "mode": "Hall",
+    "diffusion_percent": 82,
+    "modulation_percent": 12,
+    "damping_percent": 72,
+    "width_percent": 85,
+    "low_cut_hz": 120,
+    "high_cut_hz": 8000
+  }
+}

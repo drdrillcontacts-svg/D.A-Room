@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Guitar Plate",
+  "parameters": {
+    "mix": 18,
+    "predelay_ms": 10,
+    "decay_seconds": 1.6,
+    "size_percent": 48,
+    "mode": "Plate",
+    "diffusion_percent": 75,
+    "modulation_percent": 20,
+    "damping_percent": 45,
+    "width_percent": 74,
+    "low_cut_hz": 90,
+    "high_cut_hz": 14500
+  }
+}

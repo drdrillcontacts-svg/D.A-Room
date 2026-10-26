@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Studio Tight",
+  "parameters": {
+    "mix": 12,
+    "predelay_ms": 5,
+    "decay_seconds": 0.45,
+    "size_percent": 28,
+    "mode": "Room",
+    "diffusion_percent": 65,
+    "modulation_percent": 8,
+    "damping_percent": 62,
+    "width_percent": 55,
+    "low_cut_hz": 120,
+    "high_cut_hz": 15000
+  }
+}

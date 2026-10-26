@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Airy Vocal",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 28,
+    "decay_seconds": 5.0,
+    "size_percent": 84,
+    "mode": "Ambience",
+    "diffusion_percent": 92,
+    "modulation_percent": 24,
+    "damping_percent": 42,
+    "width_percent": 90,
+    "low_cut_hz": 150,
+    "high_cut_hz": 16000
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Vocal Chamber",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 22,
+    "decay_seconds": 2.7,
+    "size_percent": 66,
+    "mode": "Chamber",
+    "diffusion_percent": 80,
+    "modulation_percent": 20,
+    "damping_percent": 48,
+    "width_percent": 82,
+    "low_cut_hz": 130,
+    "high_cut_hz": 15000
+  }
+}

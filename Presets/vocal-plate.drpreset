@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Vocal Plate",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 18,
+    "decay_seconds": 1.8,
+    "size_percent": 58,
+    "mode": "Plate",
+    "diffusion_percent": 78,
+    "modulation_percent": 25,
+    "damping_percent": 32,
+    "width_percent": 82,
+    "low_cut_hz": 120,
+    "high_cut_hz": 16000
+  }
+}

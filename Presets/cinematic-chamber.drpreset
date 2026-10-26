@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Cinematic Chamber",
+  "parameters": {
+    "mix": 25,
+    "predelay_ms": 28,
+    "decay_seconds": 5.6,
+    "size_percent": 88,
+    "mode": "Chamber",
+    "diffusion_percent": 88,
+    "modulation_percent": 26,
+    "damping_percent": 50,
+    "width_percent": 96,
+    "low_cut_hz": 80,
+    "high_cut_hz": 13500
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Tracking Room",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 16,
+    "decay_seconds": 1.45,
+    "size_percent": 58,
+    "mode": "Room",
+    "diffusion_percent": 84,
+    "modulation_percent": 18,
+    "damping_percent": 50,
+    "width_percent": 76,
+    "low_cut_hz": 80,
+    "high_cut_hz": 16000
+  }
+}

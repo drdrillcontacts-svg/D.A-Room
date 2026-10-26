@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Bright Hall",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 18,
+    "decay_seconds": 2.8,
+    "size_percent": 68,
+    "mode": "Hall",
+    "diffusion_percent": 80,
+    "modulation_percent": 22,
+    "damping_percent": 30,
+    "width_percent": 90,
+    "low_cut_hz": 100,
+    "high_cut_hz": 18000
+  }
+}

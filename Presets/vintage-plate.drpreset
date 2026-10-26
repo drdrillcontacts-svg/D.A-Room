@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Vintage Plate",
+  "parameters": {
+    "mix": 25,
+    "predelay_ms": 12,
+    "decay_seconds": 2.2,
+    "size_percent": 62,
+    "mode": "Plate",
+    "diffusion_percent": 70,
+    "modulation_percent": 10,
+    "damping_percent": 65,
+    "width_percent": 75,
+    "low_cut_hz": 100,
+    "high_cut_hz": 11000
+  }
+}

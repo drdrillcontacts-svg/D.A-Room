@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Wide Room",
+  "parameters": {
+    "mix": 25,
+    "predelay_ms": 12,
+    "decay_seconds": 1.35,
+    "size_percent": 62,
+    "mode": "Room",
+    "diffusion_percent": 88,
+    "modulation_percent": 30,
+    "damping_percent": 45,
+    "width_percent": 100,
+    "low_cut_hz": 90,
+    "high_cut_hz": 16500
+  }
+}

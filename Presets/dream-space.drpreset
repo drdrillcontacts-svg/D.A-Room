@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Dream Space",
+  "parameters": {
+    "mix": 32,
+    "predelay_ms": 30,
+    "decay_seconds": 7.2,
+    "size_percent": 90,
+    "mode": "Ambience",
+    "diffusion_percent": 92,
+    "modulation_percent": 28,
+    "damping_percent": 60,
+    "width_percent": 100,
+    "low_cut_hz": 100,
+    "high_cut_hz": 14000
+  }
+}

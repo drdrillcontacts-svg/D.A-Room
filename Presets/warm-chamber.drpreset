@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Warm Chamber",
+  "parameters": {
+    "mix": 28,
+    "predelay_ms": 20,
+    "decay_seconds": 2.4,
+    "size_percent": 68,
+    "mode": "Chamber",
+    "diffusion_percent": 80,
+    "modulation_percent": 12,
+    "damping_percent": 68,
+    "width_percent": 76,
+    "low_cut_hz": 100,
+    "high_cut_hz": 12000
+  }
+}

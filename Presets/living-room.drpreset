@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Living Room",
+  "parameters": {
+    "mix": 20,
+    "predelay_ms": 14,
+    "decay_seconds": 1.2,
+    "size_percent": 50,
+    "mode": "Room",
+    "diffusion_percent": 80,
+    "modulation_percent": 10,
+    "damping_percent": 55,
+    "width_percent": 72,
+    "low_cut_hz": 100,
+    "high_cut_hz": 13500
+  }
+}

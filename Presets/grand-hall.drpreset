@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Grand Hall",
+  "parameters": {
+    "mix": 27,
+    "predelay_ms": 28,
+    "decay_seconds": 5.2,
+    "size_percent": 88,
+    "mode": "Hall",
+    "diffusion_percent": 86,
+    "modulation_percent": 24,
+    "damping_percent": 46,
+    "width_percent": 96,
+    "low_cut_hz": 90,
+    "high_cut_hz": 15000
+  }
+}

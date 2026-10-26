@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Soft Hall",
+  "parameters": {
+    "mix": 20,
+    "predelay_ms": 25,
+    "decay_seconds": 3.8,
+    "size_percent": 76,
+    "mode": "Hall",
+    "diffusion_percent": 90,
+    "modulation_percent": 8,
+    "damping_percent": 70,
+    "width_percent": 80,
+    "low_cut_hz": 110,
+    "high_cut_hz": 10500
+  }
+}

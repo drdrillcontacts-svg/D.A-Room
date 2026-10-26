@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Ambience",
+  "name": "Ambient Cloud",
+  "parameters": {
+    "mix": 30,
+    "predelay_ms": 35,
+    "decay_seconds": 8.5,
+    "size_percent": 95,
+    "mode": "Ambience",
+    "diffusion_percent": 88,
+    "modulation_percent": 22,
+    "damping_percent": 65,
+    "width_percent": 96,
+    "low_cut_hz": 100,
+    "high_cut_hz": 12000
+  }
+}

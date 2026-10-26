@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Pop Plate",
+  "parameters": {
+    "mix": 20,
+    "predelay_ms": 14,
+    "decay_seconds": 2.1,
+    "size_percent": 57,
+    "mode": "Plate",
+    "diffusion_percent": 80,
+    "modulation_percent": 28,
+    "damping_percent": 30,
+    "width_percent": 82,
+    "low_cut_hz": 120,
+    "high_cut_hz": 17000
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Vintage Room",
+  "parameters": {
+    "mix": 22,
+    "predelay_ms": 18,
+    "decay_seconds": 1.6,
+    "size_percent": 55,
+    "mode": "Room",
+    "diffusion_percent": 76,
+    "modulation_percent": 6,
+    "damping_percent": 72,
+    "width_percent": 65,
+    "low_cut_hz": 100,
+    "high_cut_hz": 9500
+  }
+}

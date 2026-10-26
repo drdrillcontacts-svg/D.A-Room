@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Chamber",
+  "name": "Stone Chamber",
+  "parameters": {
+    "mix": 24,
+    "predelay_ms": 20,
+    "decay_seconds": 3.6,
+    "size_percent": 72,
+    "mode": "Chamber",
+    "diffusion_percent": 78,
+    "modulation_percent": 14,
+    "damping_percent": 60,
+    "width_percent": 80,
+    "low_cut_hz": 120,
+    "high_cut_hz": 11500
+  }
+}

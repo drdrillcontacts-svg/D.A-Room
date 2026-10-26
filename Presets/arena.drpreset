@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Hall",
+  "name": "Arena",
+  "parameters": {
+    "mix": 28,
+    "predelay_ms": 32,
+    "decay_seconds": 5.8,
+    "size_percent": 95,
+    "mode": "Hall",
+    "diffusion_percent": 86,
+    "modulation_percent": 28,
+    "damping_percent": 48,
+    "width_percent": 100,
+    "low_cut_hz": 100,
+    "high_cut_hz": 14000
+  }
+}

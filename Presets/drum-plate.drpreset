@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Drum Plate",
+  "parameters": {
+    "mix": 18,
+    "predelay_ms": 4,
+    "decay_seconds": 1.35,
+    "size_percent": 50,
+    "mode": "Plate",
+    "diffusion_percent": 80,
+    "modulation_percent": 18,
+    "damping_percent": 40,
+    "width_percent": 78,
+    "low_cut_hz": 70,
+    "high_cut_hz": 17000
+  }
+}

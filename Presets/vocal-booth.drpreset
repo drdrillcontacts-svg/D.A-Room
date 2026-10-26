@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Vocal Booth",
+  "parameters": {
+    "mix": 14,
+    "predelay_ms": 8,
+    "decay_seconds": 0.55,
+    "size_percent": 32,
+    "mode": "Room",
+    "diffusion_percent": 70,
+    "modulation_percent": 12,
+    "damping_percent": 58,
+    "width_percent": 65,
+    "low_cut_hz": 150,
+    "high_cut_hz": 14500
+  }
+}

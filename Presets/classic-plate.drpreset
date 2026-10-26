@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Plate",
+  "name": "Classic Plate",
+  "parameters": {
+    "mix": 23,
+    "predelay_ms": 11,
+    "decay_seconds": 2.0,
+    "size_percent": 60,
+    "mode": "Plate",
+    "diffusion_percent": 72,
+    "modulation_percent": 16,
+    "damping_percent": 52,
+    "width_percent": 78,
+    "low_cut_hz": 100,
+    "high_cut_hz": 14000
+  }
+}

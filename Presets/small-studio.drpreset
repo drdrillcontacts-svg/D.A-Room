@@ -1,0 +1,19 @@
+{
+  "format": "DARoomPreset",
+  "version": 2,
+  "category": "Room",
+  "name": "Small Studio",
+  "parameters": {
+    "mix": 18,
+    "predelay_ms": 10,
+    "decay_seconds": 0.7,
+    "size_percent": 38,
+    "mode": "Room",
+    "diffusion_percent": 72,
+    "modulation_percent": 15,
+    "damping_percent": 55,
+    "width_percent": 72,
+    "low_cut_hz": 100,
+    "high_cut_hz": 16000
+  }
+}
