@@ -1,0 +1,43 @@
+name: Build DAroom
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  build-macos:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install CMake
+        run: brew install cmake ninja
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Build VST3, AU and Standalone
+        run: cmake --build build --config Release --parallel 3
+      - name: Upload macOS plugins
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAroom-macOS-VST3-AU
+          path: |
+            build/DAroom_artefacts/Release/VST3/**
+            build/DAroom_artefacts/Release/AU/**
+            build/DAroom_artefacts/Release/Standalone/**
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -S . -B build -A x64
+      - name: Build VST3
+        run: cmake --build build --config Release --parallel
+      - name: Upload Windows plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: DAroom-Windows-VST3
+          path: build/DAroom_artefacts/Release/VST3/**
