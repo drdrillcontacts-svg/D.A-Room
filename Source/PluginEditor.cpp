@@ -2,338 +2,664 @@
 #include "BinaryData.h"
 #include <cmath>
 
-namespace
+DARoomLookAndFeel::DARoomLookAndFeel()
 {
-struct FactoryPreset
-{
-    const char* name;
-    float mix, predelay, decay, size;
-    int mode;
-    float diffusion, modulation, damping, width, lowCut, highCut;
-};
-
-const FactoryPreset factoryPresets[] = {
-    { "Studio Tight", 12f, 5f, 0.45f, 28f, 0, 65f, 8f, 62f, 55f, 120f, 15000f },
-    { "Vocal Booth", 14f, 8f, 0.55f, 32f, 0, 70f, 12f, 58f, 65f, 150f, 14500f },
-    { "Small Studio", 18f, 10f, 0.7f, 38f, 0, 72f, 15f, 55f, 72f, 100f, 16000f },
-    { "Wood Room", 20f, 12f, 0.9f, 42f, 0, 78f, 18f, 60f, 68f, 90f, 14000f },
-    { "Drum Room", 22f, 4f, 0.85f, 52f, 0, 82f, 22f, 48f, 80f, 70f, 17000f },
-    { "Bright Room", 18f, 7f, 1.1f, 48f, 0, 75f, 26f, 32f, 78f, 130f, 18000f },
-    { "Living Room", 20f, 14f, 1.2f, 50f, 0, 80f, 10f, 55f, 72f, 100f, 13500f },
-    { "Tracking Room", 24f, 16f, 1.45f, 58f, 0, 84f, 18f, 50f, 76f, 80f, 16000f },
-    { "Wide Room", 25f, 12f, 1.35f, 62f, 0, 88f, 30f, 45f, 100f, 90f, 16500f },
-    { "Vintage Room", 22f, 18f, 1.6f, 55f, 0, 76f, 6f, 72f, 65f, 100f, 9500f },
-    { "Small Hall", 20f, 18f, 1.8f, 55f, 1, 72f, 12f, 48f, 72f, 100f, 15000f },
-    { "Concert Hall", 25f, 24f, 3.2f, 75f, 1, 84f, 18f, 42f, 88f, 80f, 15500f },
-    { "Dark Hall", 22f, 20f, 4.2f, 78f, 1, 82f, 12f, 72f, 85f, 120f, 8000f },
-    { "Bright Hall", 24f, 18f, 2.8f, 68f, 1, 80f, 22f, 30f, 90f, 100f, 18000f },
-    { "Cathedral", 24f, 35f, 7.5f, 92f, 1, 90f, 16f, 68f, 92f, 90f, 10000f },
-    { "Arena", 28f, 32f, 5.8f, 95f, 1, 86f, 28f, 48f, 100f, 100f, 14000f },
-    { "Orchestral Depth", 22f, 26f, 4.6f, 84f, 1, 88f, 20f, 52f, 92f, 70f, 14500f },
-    { "Piano Hall", 18f, 22f, 3.1f, 70f, 1, 82f, 10f, 38f, 82f, 80f, 16000f },
-    { "Grand Hall", 27f, 28f, 5.2f, 88f, 1, 86f, 24f, 46f, 96f, 90f, 15000f },
-    { "Soft Hall", 20f, 25f, 3.8f, 76f, 1, 90f, 8f, 70f, 80f, 110f, 10500f },
-    { "Vocal Plate", 22f, 18f, 1.8f, 58f, 2, 78f, 25f, 32f, 82f, 120f, 16000f },
-    { "Vintage Plate", 25f, 12f, 2.2f, 62f, 2, 70f, 10f, 65f, 75f, 100f, 11000f },
-    { "Bright Plate", 22f, 8f, 2.6f, 65f, 2, 76f, 30f, 25f, 82f, 150f, 18000f },
-    { "Drum Plate", 18f, 4f, 1.35f, 50f, 2, 80f, 18f, 40f, 78f, 70f, 17000f },
-    { "Snare Bloom", 20f, 6f, 1.7f, 54f, 2, 82f, 24f, 38f, 84f, 80f, 16000f },
-    { "Smooth Plate", 24f, 16f, 2.4f, 60f, 2, 88f, 12f, 58f, 86f, 130f, 12500f },
-    { "Guitar Plate", 18f, 10f, 1.6f, 48f, 2, 75f, 20f, 45f, 74f, 90f, 14500f },
-    { "Pop Plate", 20f, 14f, 2.1f, 57f, 2, 80f, 28f, 30f, 82f, 120f, 17000f },
-    { "Dark Plate", 24f, 20f, 2.8f, 68f, 2, 82f, 10f, 75f, 88f, 120f, 8500f },
-    { "Classic Plate", 23f, 11f, 2.0f, 60f, 2, 72f, 16f, 52f, 78f, 100f, 14000f },
-    { "Deep Chamber", 26f, 25f, 4.5f, 78f, 3, 82f, 18f, 50f, 78f, 100f, 14000f },
-    { "Stone Chamber", 24f, 20f, 3.6f, 72f, 3, 78f, 14f, 60f, 80f, 120f, 11500f },
-    { "Warm Chamber", 28f, 20f, 2.4f, 68f, 3, 80f, 12f, 68f, 76f, 100f, 12000f },
-    { "Dark Chamber", 20f, 16f, 3.2f, 64f, 3, 84f, 8f, 78f, 82f, 140f, 9000f },
-    { "Gold Chamber", 26f, 14f, 2.8f, 70f, 3, 86f, 22f, 42f, 88f, 90f, 15000f },
-    { "Vocal Chamber", 24f, 22f, 2.7f, 66f, 3, 80f, 20f, 48f, 82f, 130f, 15000f },
-    { "Cinematic Chamber", 25f, 28f, 5.6f, 88f, 3, 88f, 26f, 50f, 96f, 80f, 13500f },
-    { "Tight Chamber", 16f, 10f, 1.5f, 45f, 3, 74f, 12f, 58f, 68f, 100f, 14000f },
-    { "Velvet Chamber", 24f, 18f, 3.4f, 74f, 3, 90f, 14f, 72f, 86f, 120f, 11000f },
-    { "Wide Chamber", 28f, 24f, 4.2f, 82f, 3, 88f, 32f, 45f, 100f, 100f, 14500f },
-    { "Ambient Cloud", 30f, 35f, 8.5f, 95f, 4, 88f, 22f, 65f, 96f, 100f, 12000f },
-    { "Dream Space", 32f, 30f, 7.2f, 90f, 4, 92f, 28f, 60f, 100f, 100f, 14000f },
-    { "Cosmic Drift", 28f, 42f, 10.0f, 100f, 4, 92f, 36f, 52f, 100f, 80f, 13000f },
-    { "Frozen Air", 22f, 28f, 5.8f, 86f, 4, 94f, 20f, 72f, 90f, 180f, 10500f },
-    { "Soft Focus", 18f, 24f, 4.2f, 78f, 4, 90f, 10f, 76f, 86f, 130f, 10000f },
-    { "Wide Synth", 30f, 18f, 5.2f, 88f, 4, 88f, 32f, 48f, 100f, 100f, 15000f },
-    { "Endless Horizon", 30f, 50f, 12.0f, 100f, 4, 94f, 26f, 68f, 100f, 70f, 11500f },
-    { "Airy Vocal", 24f, 28f, 5.0f, 84f, 4, 92f, 24f, 42f, 90f, 150f, 16000f },
-    { "Shimmering Tail", 26f, 22f, 6.4f, 92f, 4, 90f, 38f, 28f, 96f, 120f, 18000f },
-    { "Afterglow", 25f, 32f, 7.8f, 94f, 4, 96f, 18f, 62f, 98f, 90f, 12500f },
-};
-constexpr int numFactoryPresets = (int) (sizeof(factoryPresets) / sizeof(factoryPresets[0]));
-const char* modeNames[] = { "ROOM", "HALL", "PLATE", "CHAMBER", "AMBIENCE" };
-const char* parameterIDs[] = { "mix", "predelay", "decay", "size", "diffusion",
-                               "modulation", "damping", "width", "lowcut", "highcut" };
+    setColour (juce::PopupMenu::backgroundColourId, juce::Colour (0xf407131c));
+    setColour (juce::PopupMenu::textColourId, juce::Colour (0xffdcf3ff));
+    setColour (juce::PopupMenu::headerTextColourId, juce::Colour (0xff67c9ec));
+    setColour (juce::PopupMenu::highlightedBackgroundColourId, juce::Colour (0xff103a4d));
+    setColour (juce::PopupMenu::highlightedTextColourId, juce::Colour (0xffffffff));
 }
 
 void DARoomLookAndFeel::drawRotarySlider (juce::Graphics& g, int x, int y, int w, int h,
-                                          float pos, float start, float end, juce::Slider&)
+                                          float pos, float start, float end, juce::Slider& slider)
 {
-    const float diameter = (float) juce::jmin(w, h) - 5.0f;
-    const float cx = (float)x + (float)w * 0.5f;
-    const float cy = (float)y + (float)h * 0.5f;
-    const float r = diameter * 0.5f;
-    const auto bounds = juce::Rectangle<float>(cx-r, cy-r, diameter, diameter);
+    const float minDim = static_cast<float> (juce::jmin (w, h));
+    const float cx = static_cast<float> (x) + static_cast<float> (w) * 0.5f;
+    const float cy = static_cast<float> (y) + static_cast<float> (h) * 0.5f;
+    const float outerR = minDim * 0.49f;
 
-    g.setColour(juce::Colour(0x90000000));
-    g.fillEllipse(bounds.expanded(2.0f));
-    juce::ColourGradient face(juce::Colour(0xff18252c), cx, cy-r,
-                              juce::Colour(0xff03080c), cx, cy+r, false);
-    g.setGradientFill(face);
-    g.fillEllipse(bounds);
-    g.setColour(juce::Colour(0xff29424e));
-    g.drawEllipse(bounds, 1.0f);
+    // Cover static baked-in knob artwork cleanly with dark recessed bezel
+    const auto outerBounds = juce::Rectangle<float> (cx - outerR, cy - outerR, outerR * 2.0f, outerR * 2.0f);
+    g.setColour (juce::Colour (0xff050c12));
+    g.fillEllipse (outerBounds);
 
-    const float angle = start + pos * (end-start);
-    juce::Path track;
-    track.addCentredArc(cx, cy, r-3.0f, r-3.0f, 0.0f, start, end, true);
-    g.setColour(juce::Colour(0xff29414b));
-    g.strokePath(track, juce::PathStrokeType(2.0f));
-    juce::Path arc;
-    arc.addCentredArc(cx, cy, r-3.0f, r-3.0f, 0.0f, start, angle, true);
-    g.setColour(juce::Colour(0xff79dfff));
-    g.strokePath(arc, juce::PathStrokeType(2.6f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+    const float arcR = outerR * 0.89f;
+    const float capR = outerR * 0.76f;
+    const float angle = start + pos * (end - start);
 
-    juce::Point<float> p(cx + std::sin(angle) * (r*0.63f),
-                         cy - std::cos(angle) * (r*0.63f));
-    g.setColour(juce::Colour(0xffdff7ff));
-    g.drawLine(cx, cy, p.x, p.y, 2.2f);
-    g.setColour(juce::Colour(0xffdff7ff));
-    g.fillEllipse(cx-2.0f, cy-2.0f, 4.0f, 4.0f);
+    // Subtle unlit track arc
+    juce::Path trackPath;
+    trackPath.addCentredArc (cx, cy, arcR, arcR, 0.0f, start, end, true);
+    g.setColour (juce::Colour (0xff1a2d38));
+    g.strokePath (trackPath, juce::PathStrokeType (juce::jmax (1.6f, minDim * 0.028f),
+                                                   juce::PathStrokeType::curved,
+                                                   juce::PathStrokeType::rounded));
+
+    // Active cyan glow + core arc
+    if (pos > 0.002f)
+    {
+        juce::Path valueArc;
+        valueArc.addCentredArc (cx, cy, arcR, arcR, 0.0f, start, angle, true);
+
+        g.setColour (juce::Colour (0x444ad2ff));
+        g.strokePath (valueArc, juce::PathStrokeType (juce::jmax (3.5f, minDim * 0.068f),
+                                                      juce::PathStrokeType::curved,
+                                                      juce::PathStrokeType::rounded));
+
+        g.setColour (slider.isMouseOverOrDragging() ? juce::Colour (0xffa8edff) : juce::Colour (0xff7fdfff));
+        g.strokePath (valueArc, juce::PathStrokeType (juce::jmax (2.0f, minDim * 0.034f),
+                                                      juce::PathStrokeType::curved,
+                                                      juce::PathStrokeType::rounded));
+    }
+
+    // Dark brushed metallic cap
+    const auto capBounds = juce::Rectangle<float> (cx - capR, cy - capR, capR * 2.0f, capR * 2.0f);
+    g.setColour (juce::Colour (0xaa000000));
+    g.fillEllipse (capBounds.expanded (1.5f));
+
+    juce::ColourGradient capGrad (juce::Colour (0xff1c2d37), cx - capR * 0.3f, cy - capR,
+                                  juce::Colour (0xff050b10), cx + capR * 0.3f, cy + capR, false);
+    g.setGradientFill (capGrad);
+    g.fillEllipse (capBounds);
+
+    g.setColour (slider.isMouseOverOrDragging() ? juce::Colour (0xff42758a) : juce::Colour (0xff27414d));
+    g.drawEllipse (capBounds, 1.1f);
+
+    // Crisp outer rim pointer tick (matching DAroom_GUI.png style)
+    const float tickInner = capR * 0.56f;
+    const float tickOuter = capR * 0.86f;
+    const float sinA = std::sin (angle);
+    const float cosA = std::cos (angle);
+    g.setColour (juce::Colour (0xffeaf9ff));
+    g.drawLine (cx + sinA * tickInner, cy - cosA * tickInner,
+                cx + sinA * tickOuter, cy - cosA * tickOuter,
+                juce::jmax (1.6f, minDim * 0.026f));
+}
+
+void DARoomLookAndFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int width, int height,
+                                          float sliderPos, float /*minSliderPos*/, float /*maxSliderPos*/,
+                                          juce::Slider::SliderStyle /*style*/, juce::Slider& slider)
+{
+    const auto area = juce::Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
+                                              static_cast<float> (width), static_cast<float> (height));
+    // Cover baked-in track cleanly with bottom panel dark tone
+    g.setColour (juce::Colour (0xff050c12));
+    g.fillRoundedRectangle (area.expanded (2.0f, 0.0f), 3.0f);
+
+    const float cy = area.getCentreY();
+    const float pad = juce::jmax (5.0f, area.getHeight() * 0.32f);
+    const float x0 = area.getX() + pad;
+    const float x1 = area.getRight() - pad;
+    const float thumbX = juce::jlimit (x0, x1, sliderPos);
+
+    // Unlit track
+    g.setColour (juce::Colour (0xff1c303b));
+    g.drawLine (x0, cy, x1, cy, 2.2f);
+
+    // Lit cyan track + soft glow
+    g.setColour (juce::Colour (0x444ad2ff));
+    g.drawLine (x0, cy, thumbX, cy, 5.2f);
+    g.setColour (juce::Colour (0xff78dcff));
+    g.drawLine (x0, cy, thumbX, cy, 2.4f);
+
+    // Glowing thumb
+    const float r = juce::jmax (3.6f, area.getHeight() * 0.25f);
+    g.setColour (juce::Colour (0x556ce0ff));
+    g.fillEllipse (thumbX - r * 1.7f, cy - r * 1.7f, r * 3.4f, r * 3.4f);
+    g.setColour (slider.isMouseOverOrDragging() ? juce::Colour (0xffffffff) : juce::Colour (0xffdff7ff));
+    g.fillEllipse (thumbX - r, cy - r, r * 2.0f, r * 2.0f);
+}
+
+void DARoomLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& button,
+                                              const juce::Colour& /*backgroundColour*/,
+                                              bool isHighlighted, bool isDown)
+{
+    const auto bounds = button.getLocalBounds().toFloat();
+    const auto id = button.getComponentID();
+
+    if (id == "transparentHit")
+    {
+        if (isHighlighted || isDown)
+        {
+            g.setColour (juce::Colour (isDown ? 0x3578dcff : 0x1e78dcff));
+            g.fillRoundedRectangle (bounds.reduced (2.0f), 6.0f);
+        }
+        return;
+    }
+
+    if (id == "presetCenter")
+    {
+        g.setColour (juce::Colour (isHighlighted ? 0xf2091924 : 0xee061119));
+        g.fillRect (bounds.reduced (1.0f, 3.0f));
+        return;
+    }
+
+    if (id == "modeBtn")
+    {
+        if (button.getToggleState())
+        {
+            juce::ColourGradient activeGrad (juce::Colour (0x44165a75), bounds.getCentreX(), bounds.getY(),
+                                             juce::Colour (0x88134d66), bounds.getCentreX(), bounds.getBottom(), false);
+            g.setGradientFill (activeGrad);
+            g.fillRoundedRectangle (bounds.reduced (2.0f, 3.0f), 7.0f);
+        }
+        else if (isHighlighted)
+        {
+            g.setColour (juce::Colour (0x2456bce0));
+            g.fillRoundedRectangle (bounds.reduced (2.0f, 3.0f), 7.0f);
+        }
+        return;
+    }
+
+    if (id == "abBtn")
+    {
+        if (button.getToggleState())
+        {
+            g.setColour (juce::Colour (0xcc0f384a));
+            g.fillRoundedRectangle (bounds.reduced (2.0f), 8.0f);
+        }
+        else
+        {
+            g.setColour (juce::Colour (isHighlighted ? 0xbb0a1d28 : 0xd8061018));
+            g.fillRoundedRectangle (bounds.reduced (2.0f), 8.0f);
+        }
+        return;
+    }
+}
+
+void DARoomLookAndFeel::drawButtonText (juce::Graphics& g, juce::TextButton& button,
+                                        bool isHighlighted, bool /*isDown*/)
+{
+    const auto id = button.getComponentID();
+    if (id == "transparentHit")
+        return; // Uses artwork icon (<, >, gear) directly
+
+    const auto bounds = button.getLocalBounds();
+    const float fontH = juce::jmax (10.5f, static_cast<float> (bounds.getHeight()) * (id == "presetCenter" ? 0.50f : 0.44f));
+    g.setFont (juce::Font (juce::FontOptions (fontH)));
+
+    if (id == "presetCenter")
+    {
+        g.setColour (isHighlighted ? juce::Colour (0xffffffff) : juce::Colour (0xffe8f7ff));
+        g.drawFittedText (button.getButtonText(), bounds.reduced (8, 2), juce::Justification::centred, 1);
+        return;
+    }
+
+    const bool active = button.getToggleState();
+    g.setColour (active ? juce::Colour (0xff9ceaff)
+                        : (isHighlighted ? juce::Colour (0xffd5eef8) : juce::Colour (0xff93b4c4)));
+    g.drawFittedText (button.getButtonText(), bounds.reduced (4, 2), juce::Justification::centred, 1);
 }
 
 DARoomAudioProcessorEditor::DARoomAudioProcessorEditor (DARoomAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    background = juce::ImageFileFormat::loadFrom(BinaryData::DAroom_GUI_png, BinaryData::DAroom_GUI_pngSize);
-    setSize (1015, 388);
-    setResizable (true, true);
-    setResizeLimits (810, 310, 1624, 620);
-    if (auto* c = getConstrainer())
-        c->setFixedAspectRatio ((double) referenceWidth / (double) referenceHeight);
+    setLookAndFeel (&customLookAndFeel);
+    background = juce::ImageFileFormat::loadFrom (BinaryData::DAroom_GUI_png, BinaryData::DAroom_GUI_pngSize);
 
-    const juce::StringArray names { "Mix", "Predelay", "Decay", "Size", "Diffusion",
-                                    "Modulation", "Damping", "Width", "Low Cut", "High Cut" };
-    for (int i=0; i<(int)sliders.size(); ++i)
-    {
-        auto* s = sliders[(size_t)i];
-        s->setLookAndFeel(&customLookAndFeel);
-        if (i < 8)
-        {
-            s->setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-            s->setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-        }
-        else
-        {
-            s->setSliderStyle(juce::Slider::LinearHorizontal);
-            s->setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-            s->setColour(juce::Slider::trackColourId, juce::Colour(0xff64c9f3));
-            s->setColour(juce::Slider::thumbColourId, juce::Colour(0xffdff7ff));
-        }
-        s->setTooltip(names[i]);
-        addAndMakeVisible(*s);
-        values[(size_t)i].setJustificationType(juce::Justification::centred);
-        values[(size_t)i].setFont(juce::Font(9.5f));
-        values[(size_t)i].setColour(juce::Label::textColourId, juce::Colour(0xffa9d9ee));
-        values[(size_t)i].setInterceptsMouseClicks(false, false);
-        addAndMakeVisible(values[(size_t)i]);
-        attachments[(size_t)i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-            audioProcessor.parameters, parameterIDs[i], *s);
-    }
-
-    // Preset browser: popup sections are categorized, while reverb modes below are direct-click buttons.
-    presetSelector.setColour(juce::ComboBox::backgroundColourId, juce::Colour(0xee061018));
-    presetSelector.setColour(juce::ComboBox::textColourId, juce::Colour(0xffe3f5ff));
-    presetSelector.setColour(juce::ComboBox::outlineColourId, juce::Colour(0xff27566a));
-    int itemID = 1;
-    for (int category=0; category<5; ++category)
-    {
-        presetSelector.addSectionHeading(juce::String(modeNames[category]) + " PRESETS");
-        for (int i=0; i<numFactoryPresets; ++i)
-            if (factoryPresets[i].mode == category)
-                presetSelector.addItem(factoryPresets[i].name, itemID++);
-    }
-    presetSelector.setSelectedId(31, juce::dontSendNotification); // Deep Chamber
-    presetSelector.onChange = [this]
-    {
-        const int id = presetSelector.getSelectedId();
-        if (id < 1 || id > numFactoryPresets) return;
-        const auto& pr = factoryPresets[id-1];
-        audioProcessor.applyPreset(pr.mix, pr.predelay, pr.decay, pr.size, pr.mode,
-                                   pr.diffusion, pr.modulation, pr.damping, pr.width, pr.lowCut, pr.highCut);
-        activeMode = pr.mode;
-        updateModeButtons();
-        updateValueLabels();
+    const juce::StringArray tooltips {
+        "Mix", "Predelay", "Decay", "Size",
+        "Diffusion", "Modulation", "Damping", "Width",
+        "Low Cut", "High Cut"
     };
-    addAndMakeVisible(presetSelector);
 
-    for (int i=0; i<5; ++i)
+    for (size_t i = 0; i < primarySliders.size(); ++i)
     {
-        modeButtons[(size_t)i].setButtonText(modeNames[i]);
-        modeButtons[(size_t)i].setClickingTogglesState(false);
-        modeButtons[(size_t)i].setColour(juce::TextButton::buttonColourId, juce::Colour(0x88061118));
-        modeButtons[(size_t)i].setColour(juce::TextButton::buttonOnColourId, juce::Colour(0xff0b3444));
-        modeButtons[(size_t)i].setColour(juce::TextButton::textColourOffId, juce::Colour(0xffa8c7d5));
-        modeButtons[(size_t)i].setColour(juce::TextButton::textColourOnId, juce::Colour(0xff85e3ff));
-        modeButtons[(size_t)i].onClick = [this, i]
+        auto* s = primarySliders[i];
+        s->setLookAndFeel (&customLookAndFeel);
+        s->setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+        s->setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+        s->setTooltip (tooltips[static_cast<int> (i)]);
+        s->setDoubleClickReturnValue (true, audioProcessor.parameters.getParameter (DARoomPresets::parameterIDs[i])
+                                                ->convertFrom0to1 (audioProcessor.parameters.getParameter (DARoomPresets::parameterIDs[i])->getDefaultValue()));
+        addAndMakeVisible (*s);
+
+        values[i].setJustificationType (i >= 8 ? juce::Justification::centredLeft : juce::Justification::centred);
+        values[i].setColour (juce::Label::textColourId, juce::Colour (0xffb8e4f7));
+        values[i].setInterceptsMouseClicks (false, false);
+        addAndMakeVisible (values[i]);
+
+        primaryAttachments[i] = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+            audioProcessor.parameters, DARoomPresets::parameterIDs[i], *s);
+
+        s->onValueChange = [this] { updateValueLabels(); };
+    }
+
+    for (auto* track : { &lowCutTrackSlider, &highCutTrackSlider })
+    {
+        track->setLookAndFeel (&customLookAndFeel);
+        track->setSliderStyle (juce::Slider::LinearHorizontal);
+        track->setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+        addAndMakeVisible (*track);
+    }
+    lowCutTrackSlider.setTooltip ("Low Cut");
+    highCutTrackSlider.setTooltip ("High Cut");
+
+    lowCutTrackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, "lowcut", lowCutTrackSlider);
+    highCutTrackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (
+        audioProcessor.parameters, "highcut", highCutTrackSlider);
+
+    lowCutTrackSlider.onValueChange  = [this] { updateValueLabels(); };
+    highCutTrackSlider.onValueChange = [this] { updateValueLabels(); };
+
+    // Top Preset Bar (< | Preset Name | >)
+    prevPresetButton.setComponentID ("transparentHit");
+    prevPresetButton.setTooltip ("Previous Preset");
+    prevPresetButton.onClick = [this] { stepPreset (-1); };
+    addAndMakeVisible (prevPresetButton);
+
+    presetTitleButton.setComponentID ("presetCenter");
+    presetTitleButton.setTooltip ("Browse Factory Presets");
+    presetTitleButton.onClick = [this] { openPresetMenu(); };
+    addAndMakeVisible (presetTitleButton);
+
+    nextPresetButton.setComponentID ("transparentHit");
+    nextPresetButton.setTooltip ("Next Preset");
+    nextPresetButton.onClick = [this] { stepPreset (1); };
+    addAndMakeVisible (nextPresetButton);
+
+    // Direct-click Reverb Mode Pill Buttons
+    for (size_t i = 0; i < modeButtons.size(); ++i)
+    {
+        modeButtons[i].setComponentID ("modeBtn");
+        modeButtons[i].setButtonText (DARoomPresets::modeDisplayNames[i]);
+        modeButtons[i].setClickingTogglesState (false);
+        const int modeIdx = static_cast<int> (i);
+        modeButtons[i].onClick = [this, modeIdx]
         {
-            activeMode = i;
-            audioProcessor.setMode(i);
-            updateModeButtons();
+            audioProcessor.setMode (modeIdx);
+            syncUIFromProcessor();
         };
-        addAndMakeVisible(modeButtons[(size_t)i]);
+        addAndMakeVisible (modeButtons[i]);
     }
 
-    abButtons[0].setButtonText("A");
-    abButtons[1].setButtonText("B");
-    for (auto& b : abButtons)
+    // A / B Comparison Capsule
+    abButtons[0].setButtonText ("A");
+    abButtons[1].setButtonText ("B");
+    for (size_t i = 0; i < abButtons.size(); ++i)
     {
-        b.setColour(juce::TextButton::buttonColourId, juce::Colour(0x88061118));
-        b.setColour(juce::TextButton::textColourOffId, juce::Colour(0xffd5eaf2));
-        addAndMakeVisible(b);
+        abButtons[i].setComponentID ("abBtn");
+        abButtons[i].setClickingTogglesState (false);
+        const int slot = static_cast<int> (i);
+        abButtons[i].onClick = [this, slot]
+        {
+            audioProcessor.switchAB (slot);
+            syncUIFromProcessor();
+        };
+        addAndMakeVisible (abButtons[i]);
     }
-    captureSnapshot(snapshotA);
-    snapshotB = snapshotA;
-    hasSnapshotA = hasSnapshotB = true;
-    abButtons[0].onClick = [this]
-    {
-        if (activeAB == 1) captureSnapshot(snapshotB);
-        if (hasSnapshotA) restoreSnapshot(snapshotA);
-        activeAB = 0;
-    };
-    abButtons[1].onClick = [this]
-    {
-        if (activeAB == 0) captureSnapshot(snapshotA);
-        if (!hasSnapshotB) { snapshotB = snapshotA; hasSnapshotB = true; }
-        if (hasSnapshotB) restoreSnapshot(snapshotB);
-        activeAB = 1;
-    };
-    updateModeButtons();
-    updateValueLabels();
+
+    // Top-right Settings / Preset File Menu Gear Icon
+    settingsButton.setComponentID ("transparentHit");
+    settingsButton.setTooltip ("Presets & Options");
+    settingsButton.onClick = [this] { openSettingsMenu(); };
+    addAndMakeVisible (settingsButton);
+
+    setResizable (true, true);
+    setResizeLimits (812, 310, 1624, 620);
+    if (auto* c = getConstrainer())
+        c->setFixedAspectRatio (static_cast<double> (referenceWidth) / static_cast<double> (referenceHeight));
+    setSize (1015, 388);
+
+    syncUIFromProcessor();
+    startTimerHz (30);
 }
 
 DARoomAudioProcessorEditor::~DARoomAudioProcessorEditor()
 {
-    for (auto* s : sliders) s->setLookAndFeel(nullptr);
+    stopTimer();
+    for (auto* s : primarySliders)
+    {
+        s->onValueChange = nullptr;
+        s->setLookAndFeel (nullptr);
+    }
+    lowCutTrackSlider.onValueChange = nullptr;
+    highCutTrackSlider.onValueChange = nullptr;
+    lowCutTrackSlider.setLookAndFeel (nullptr);
+    highCutTrackSlider.setLookAndFeel (nullptr);
+    setLookAndFeel (nullptr);
 }
 
-juce::Rectangle<int> DARoomAudioProcessorEditor::scaledBounds(float x,float y,float w,float h) const
+juce::Rectangle<int> DARoomAudioProcessorEditor::scaledBounds (float x, float y, float w, float h) const
 {
-    const float sx=(float)getWidth()/(float)referenceWidth;
-    const float sy=(float)getHeight()/(float)referenceHeight;
-    return { juce::roundToInt(x*sx), juce::roundToInt(y*sy),
-             juce::roundToInt(w*sx), juce::roundToInt(h*sy) };
+    const float sx = static_cast<float> (getWidth()) / static_cast<float> (referenceWidth);
+    const float sy = static_cast<float> (getHeight()) / static_cast<float> (referenceHeight);
+    return {
+        juce::roundToInt (x * sx),
+        juce::roundToInt (y * sy),
+        juce::roundToInt (w * sx),
+        juce::roundToInt (h * sy)
+    };
 }
 
-
-void DARoomAudioProcessorEditor::captureSnapshot (std::array<float, 11>& state)
+juce::Rectangle<float> DARoomAudioProcessorEditor::scaledFloatBounds (float x, float y, float w, float h) const
 {
-    const char* ids[] = { "mix", "predelay", "decay", "size", "mode", "diffusion",
-                          "modulation", "damping", "width", "lowcut", "highcut" };
-    for (int i = 0; i < 11; ++i)
-        if (auto* value = audioProcessor.parameters.getRawParameterValue(ids[i]))
-            state[(size_t)i] = value->load();
+    const float sx = static_cast<float> (getWidth()) / static_cast<float> (referenceWidth);
+    const float sy = static_cast<float> (getHeight()) / static_cast<float> (referenceHeight);
+    return { x * sx, y * sy, w * sx, h * sy };
 }
 
-void DARoomAudioProcessorEditor::restoreSnapshot (const std::array<float, 11>& state)
+void DARoomAudioProcessorEditor::timerCallback()
 {
-    const char* ids[] = { "mix", "predelay", "decay", "size", "mode", "diffusion",
-                          "modulation", "damping", "width", "lowcut", "highcut" };
-    for (int i = 0; i < 11; ++i)
-        if (auto* param = audioProcessor.parameters.getParameter(ids[i]))
-            param->setValueNotifyingHost(param->convertTo0to1(state[(size_t)i]));
-    activeMode = juce::jlimit(0, 4, (int) state[4]);
-    updateModeButtons();
+    syncUIFromProcessor();
+}
+
+void DARoomAudioProcessorEditor::syncUIFromProcessor()
+{
+    presetTitleButton.setButtonText (audioProcessor.getCurrentPresetDisplayName());
+
+    const int liveMode = audioProcessor.getMode();
+    if (liveMode != cachedMode)
+    {
+        cachedMode = liveMode;
+        updateModeButtons (liveMode);
+        repaint();
+    }
+
+    const int liveAB = audioProcessor.getActiveAB();
+    if (liveAB != cachedAB)
+    {
+        cachedAB = liveAB;
+        updateABButtons (liveAB);
+    }
+
     updateValueLabels();
 }
 
-void DARoomAudioProcessorEditor::updateModeButtons()
+void DARoomAudioProcessorEditor::updateModeButtons (int modeIndex)
 {
-    for (int i=0;i<5;++i)
+    for (size_t i = 0; i < modeButtons.size(); ++i)
+        modeButtons[i].setToggleState (static_cast<int> (i) == modeIndex, juce::dontSendNotification);
+}
+
+void DARoomAudioProcessorEditor::updateABButtons (int abSlot)
+{
+    abButtons[0].setToggleState (abSlot == 0, juce::dontSendNotification);
+    abButtons[1].setToggleState (abSlot == 1, juce::dontSendNotification);
+}
+
+void DARoomAudioProcessorEditor::stepPreset (int delta)
+{
+    int idx = audioProcessor.getSelectedPresetIndex() + delta;
+    if (idx < 0)
+        idx = DARoomPresets::numFactoryPresets - 1;
+    else if (idx >= DARoomPresets::numFactoryPresets)
+        idx = 0;
+
+    audioProcessor.applyFactoryPreset (idx);
+    syncUIFromProcessor();
+}
+
+void DARoomAudioProcessorEditor::openPresetMenu()
+{
+    juce::PopupMenu menu;
+    const int currentIdx = audioProcessor.getSelectedPresetIndex();
+
+    for (int cat = 0; cat < 5; ++cat)
     {
-        modeButtons[(size_t)i].setToggleState(i==activeMode, juce::dontSendNotification);
-        modeButtons[(size_t)i].setColour(juce::TextButton::buttonColourId,
-                                         i==activeMode ? juce::Colour(0xdd0b3545) : juce::Colour(0x99061118));
-        modeButtons[(size_t)i].setColour(juce::TextButton::textColourOffId,
-                                         i==activeMode ? juce::Colour(0xff8be7ff) : juce::Colour(0xffa8c7d5));
+        juce::PopupMenu sub;
+        for (int i = 0; i < DARoomPresets::numFactoryPresets; ++i)
+        {
+            if (DARoomPresets::factoryPresets[i].mode == cat)
+                sub.addItem (i + 1, DARoomPresets::factoryPresets[i].name, true, i == currentIdx);
+        }
+        menu.addSubMenu (juce::String (DARoomPresets::modeDisplayNames[cat]) + " PRESETS", sub, true, nullptr,
+                         DARoomPresets::factoryPresets[currentIdx].mode == cat);
     }
+
+    menu.addSeparator();
+    menu.addItem (1001, "Load Preset File (.drpreset)...");
+    menu.addItem (1002, "Save Preset File (.drpreset)...");
+
+    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&presetTitleButton),
+                        [safeThis = juce::Component::SafePointer<DARoomAudioProcessorEditor> (this)] (int result)
+                        {
+                            if (safeThis == nullptr || result == 0)
+                                return;
+
+                            if (result >= 1 && result <= DARoomPresets::numFactoryPresets)
+                            {
+                                safeThis->audioProcessor.applyFactoryPreset (result - 1);
+                                safeThis->syncUIFromProcessor();
+                            }
+                            else if (result == 1001)
+                            {
+                                safeThis->promptLoadPreset();
+                            }
+                            else if (result == 1002)
+                            {
+                                safeThis->promptSavePreset();
+                            }
+                        });
+}
+
+void DARoomAudioProcessorEditor::openSettingsMenu()
+{
+    juce::PopupMenu menu;
+    menu.addSectionHeader ("D.A ROOM OPTIONS");
+    menu.addItem (1, "Load Preset (.drpreset)...");
+    menu.addItem (2, "Save Preset (.drpreset)...");
+    menu.addSeparator();
+    menu.addItem (3, audioProcessor.getActiveAB() == 0 ? "Copy A to B" : "Copy B to A");
+    menu.addItem (4, "Reset to Default (Deep Chamber)");
+    menu.addSeparator();
+
+    juce::PopupMenu zoomMenu;
+    zoomMenu.addItem (10, "75% (812 x 310)");
+    zoomMenu.addItem (11, "100% (1015 x 388)");
+    zoomMenu.addItem (12, "125% (1269 x 484)");
+    zoomMenu.addItem (13, "150% (1522 x 581)");
+    menu.addSubMenu ("Window Size", zoomMenu);
+
+    menu.showMenuAsync (juce::PopupMenu::Options().withTargetComponent (&settingsButton),
+                        [safeThis = juce::Component::SafePointer<DARoomAudioProcessorEditor> (this)] (int result)
+                        {
+                            if (safeThis == nullptr || result == 0)
+                                return;
+
+                            switch (result)
+                            {
+                                case 1: safeThis->promptLoadPreset(); break;
+                                case 2: safeThis->promptSavePreset(); break;
+                                case 3: safeThis->audioProcessor.copyActiveABToOther(); break;
+                                case 4:
+                                    safeThis->audioProcessor.applyFactoryPreset (DARoomPresets::defaultPresetIndex);
+                                    safeThis->syncUIFromProcessor();
+                                    break;
+                                case 10: safeThis->setSize (812, 310); break;
+                                case 11: safeThis->setSize (1015, 388); break;
+                                case 12: safeThis->setSize (1269, 484); break;
+                                case 13: safeThis->setSize (1522, 581); break;
+                                default: break;
+                            }
+                        });
+}
+
+void DARoomAudioProcessorEditor::promptLoadPreset()
+{
+    fileChooser = std::make_unique<juce::FileChooser> (
+        "Load D.A Room Preset",
+        juce::File::getSpecialLocation (juce::File::userDocumentsDirectory),
+        "*.drpreset");
+
+    fileChooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                              [safeThis = juce::Component::SafePointer<DARoomAudioProcessorEditor> (this)] (const juce::FileChooser& fc)
+                              {
+                                  if (safeThis == nullptr)
+                                      return;
+                                  const auto chosen = fc.getResult();
+                                  if (chosen.existsAsFile() && safeThis->audioProcessor.loadPresetFromFile (chosen))
+                                      safeThis->syncUIFromProcessor();
+                              });
+}
+
+void DARoomAudioProcessorEditor::promptSavePreset()
+{
+    fileChooser = std::make_unique<juce::FileChooser> (
+        "Save D.A Room Preset",
+        juce::File::getSpecialLocation (juce::File::userDocumentsDirectory)
+            .getChildFile (audioProcessor.getCurrentPresetDisplayName() + ".drpreset"),
+        "*.drpreset");
+
+    fileChooser->launchAsync (juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles,
+                              [safeThis = juce::Component::SafePointer<DARoomAudioProcessorEditor> (this)] (const juce::FileChooser& fc)
+                              {
+                                  if (safeThis == nullptr)
+                                      return;
+                                  auto chosen = fc.getResult();
+                                  if (chosen != juce::File())
+                                  {
+                                      if (! chosen.hasFileExtension (".drpreset"))
+                                          chosen = chosen.withFileExtension (".drpreset");
+                                      if (safeThis->audioProcessor.savePresetToFile (chosen))
+                                          safeThis->syncUIFromProcessor();
+                                  }
+                              });
 }
 
 void DARoomAudioProcessorEditor::updateValueLabels()
 {
-    const auto val = [this](int i) { return sliders[(size_t)i]->getValue(); };
-    values[0].setText(juce::String(val(0),0)+"%",juce::dontSendNotification);
-    values[1].setText(juce::String(val(1),0)+" ms",juce::dontSendNotification);
-    values[2].setText(juce::String(val(2),2)+" s",juce::dontSendNotification);
-    values[3].setText(juce::String(val(3),0)+"%",juce::dontSendNotification);
-    values[4].setText(juce::String(val(4),0)+"%",juce::dontSendNotification);
-    values[5].setText(juce::String(val(5),0)+"%",juce::dontSendNotification);
-    values[6].setText(juce::String(val(6),0)+"%",juce::dontSendNotification);
-    values[7].setText(juce::String(val(7),0)+"%",juce::dontSendNotification);
-    values[8].setText(val(8)>=1000.0?juce::String(val(8)/1000.0,2)+" kHz":juce::String(val(8),0)+" Hz",juce::dontSendNotification);
-    values[9].setText(juce::String(val(9)/1000.0,1)+" kHz",juce::dontSendNotification);
+    const auto val = [this] (size_t i) { return primarySliders[i]->getValue(); };
+
+    values[0].setText (juce::String (val (0), 0) + "%", juce::dontSendNotification);
+    values[1].setText (juce::String (val (1), 0) + " ms", juce::dontSendNotification);
+    values[2].setText (juce::String (val (2), 2) + " s", juce::dontSendNotification);
+    values[3].setText (juce::String (val (3), 0) + "%", juce::dontSendNotification);
+    values[4].setText (juce::String (val (4), 0) + "%", juce::dontSendNotification);
+    values[5].setText (juce::String (val (5), 0) + "%", juce::dontSendNotification);
+    values[6].setText (juce::String (val (6), 0) + "%", juce::dontSendNotification);
+    values[7].setText (juce::String (val (7), 0) + "%", juce::dontSendNotification);
+
+    const double lc = val (8);
+    values[8].setText (lc >= 1000.0 ? juce::String (lc / 1000.0, 2) + " kHz"
+                                    : juce::String (lc, 0) + " Hz",
+                       juce::dontSendNotification);
+    values[9].setText (juce::String (val (9) / 1000.0, 1) + " kHz", juce::dontSendNotification);
 }
 
-void DARoomAudioProcessorEditor::paint(juce::Graphics& g)
+void DARoomAudioProcessorEditor::paint (juce::Graphics& g)
 {
     if (background.isValid())
-        g.drawImage(background, getLocalBounds().toFloat());
+    {
+        g.setImageResamplingQuality (juce::Graphics::highResamplingQuality);
+        g.drawImage (background, getLocalBounds().toFloat());
+    }
     else
     {
-        g.fillAll(juce::Colour(0xff061018));
-        g.setColour(juce::Colour(0xffb5eaff));
-        g.setFont(juce::Font(22.0f));
-        g.drawText("D.A Room", 20, 8, 240, 36, juce::Justification::left);
+        g.fillAll (juce::Colour (0xff061018));
+        g.setColour (juce::Colour (0xffb5eaff));
+        g.setFont (juce::Font (juce::FontOptions (22.0f)));
+        g.drawText ("D.A Room", 20, 8, 240, 36, juce::Justification::left);
     }
-    // Cover baked-in values so the displayed readouts stay in sync with live parameters.
-    g.setColour(juce::Colour(0xe9061018));
-    for (auto r : { scaledBounds(95,426,105,42), scaledBounds(315,426,115,42),
-                    scaledBounds(1570,426,120,42), scaledBounds(1790,426,110,42),
-                    scaledBounds(145,672,115,30), scaledBounds(390,672,115,30),
-                    scaledBounds(690,672,115,30), scaledBounds(990,672,115,30),
-                    scaledBounds(1360,638,145,38), scaledBounds(1725,638,150,38) })
-        g.fillRoundedRectangle(r.toFloat(), 3.0f);
-    // Add a subtle glass panel under the five direct-click mode buttons.
-    g.setColour(juce::Colour(0xd9061018));
-    g.fillRoundedRectangle(scaledBounds(550,468,910,67).toFloat(), 12.0f);
-    g.setColour(juce::Colour(0x773b9bb8));
-    g.drawRoundedRectangle(scaledBounds(550,468,910,67).toFloat(), 12.0f, 1.0f);
+
+    // Cover baked-in value readouts at exact measured reference coordinates
+    static constexpr float readoutBoxes[10][4] = {
+        {   91.0f, 437.0f, 110.0f, 30.0f }, // MIX
+        {  324.0f, 437.0f, 120.0f, 30.0f }, // PREDELAY
+        { 1590.0f, 437.0f, 120.0f, 30.0f }, // DECAY
+        { 1827.0f, 437.0f, 110.0f, 30.0f }, // SIZE
+        {  195.0f, 679.0f, 110.0f, 26.0f }, // DIFFUSION
+        {  495.0f, 679.0f, 110.0f, 26.0f }, // MODULATION
+        {  800.0f, 679.0f, 110.0f, 26.0f }, // DAMPING
+        { 1095.0f, 679.0f, 110.0f, 26.0f }, // WIDTH
+        { 1395.0f, 637.0f, 112.0f, 28.0f }, // LOW CUT
+        { 1758.0f, 637.0f, 118.0f, 28.0f }  // HIGH CUT
+    };
+
+    for (size_t i = 0; i < 10; ++i)
+    {
+        g.setColour (i < 4 ? juce::Colour (0xf4040a10) : juce::Colour (0xf6050c12));
+        g.fillRoundedRectangle (scaledFloatBounds (readoutBoxes[i][0], readoutBoxes[i][1],
+                                                   readoutBoxes[i][2], readoutBoxes[i][3]),
+                                3.0f);
+    }
+
+    // Cover baked-in CHAMBER bottom glow & render live mode pill + dynamic cyan underline glow
+    g.setColour (juce::Colour (0xf2040a10));
+    g.fillRoundedRectangle (scaledFloatBounds (1070.0f, 528.0f, 235.0f, 24.0f), 4.0f);
+
+    const auto pillRect = scaledFloatBounds (556.0f, 466.0f, 918.0f, 70.0f);
+    g.setColour (juce::Colour (0xec050e16));
+    g.fillRoundedRectangle (pillRect, pillRect.getHeight() * 0.25f);
+    g.setColour (juce::Colour (0x66306e88));
+    g.drawRoundedRectangle (pillRect, pillRect.getHeight() * 0.25f, 1.0f);
+
+    // Subtle vertical dividers between the 5 modes
+    g.setColour (juce::Colour (0x334788a3));
+    for (int d = 1; d < 5; ++d)
+    {
+        const float dx = 556.0f + static_cast<float> (d) * (918.0f / 5.0f);
+        const auto lineBounds = scaledFloatBounds (dx, 480.0f, 1.0f, 42.0f);
+        g.drawVerticalLine (juce::roundToInt (lineBounds.getX()), lineBounds.getY(), lineBounds.getBottom());
+    }
+
+    // Dynamic active cyan glow bar under the active reverb mode
+    const int activeMode = juce::jlimit (0, 4, audioProcessor.getMode());
+    const float slotW = 918.0f / 5.0f;
+    const float glowX = 556.0f + static_cast<float> (activeMode) * slotW + slotW * 0.16f;
+    const float glowW = slotW * 0.68f;
+    const auto glowBar = scaledFloatBounds (glowX, 533.0f, glowW, 3.5f);
+    g.setColour (juce::Colour (0x445cd9ff));
+    g.fillRoundedRectangle (glowBar.expanded (4.0f, 2.5f), 3.0f);
+    g.setColour (juce::Colour (0xff8ce8ff));
+    g.fillRoundedRectangle (glowBar, 1.8f);
 }
 
 void DARoomAudioProcessorEditor::resized()
 {
-    const std::array<juce::Rectangle<int>,10> refs {{
-        {72,225,145,145}, {307,225,145,145}, {1562,225,145,145}, {1786,225,145,145},
-        {70,566,115,115}, {374,566,115,115}, {676,566,115,115}, {972,566,115,115},
-        {1358,650,215,42}, {1717,650,220,42}
-    }};
-    for (int i=0;i<10;++i)
+    static constexpr float knobRefs[10][4] = {
+        {   66.0f, 225.0f, 160.0f, 160.0f }, // MIX
+        {  304.0f, 225.0f, 160.0f, 160.0f }, // PREDELAY
+        { 1570.0f, 225.0f, 160.0f, 160.0f }, // DECAY
+        { 1802.0f, 225.0f, 160.0f, 160.0f }, // SIZE
+        {   70.0f, 563.0f, 116.0f, 116.0f }, // DIFFUSION
+        {  384.0f, 563.0f, 116.0f, 116.0f }, // MODULATION
+        {  682.0f, 563.0f, 116.0f, 116.0f }, // DAMPING
+        {  981.0f, 563.0f, 116.0f, 116.0f }, // WIDTH
+        { 1282.0f, 577.0f,  88.0f,  88.0f }, // LOW CUT KNOB
+        { 1636.0f, 577.0f,  88.0f,  88.0f }  // HIGH CUT KNOB
+    };
+
+    for (size_t i = 0; i < 10; ++i)
+        primarySliders[i]->setBounds (scaledBounds (knobRefs[i][0], knobRefs[i][1], knobRefs[i][2], knobRefs[i][3]));
+
+    lowCutTrackSlider.setBounds  (scaledBounds (1382.0f, 678.0f, 192.0f, 28.0f));
+    highCutTrackSlider.setBounds (scaledBounds (1744.0f, 678.0f, 208.0f, 28.0f));
+
+    static constexpr float valueRefs[10][4] = {
+        {   91.0f, 437.0f, 110.0f, 30.0f },
+        {  324.0f, 437.0f, 120.0f, 30.0f },
+        { 1590.0f, 437.0f, 120.0f, 30.0f },
+        { 1827.0f, 437.0f, 110.0f, 30.0f },
+        {  195.0f, 679.0f, 110.0f, 26.0f },
+        {  495.0f, 679.0f, 110.0f, 26.0f },
+        {  800.0f, 679.0f, 110.0f, 26.0f },
+        { 1095.0f, 679.0f, 110.0f, 26.0f },
+        { 1397.0f, 637.0f, 110.0f, 28.0f },
+        { 1760.0f, 637.0f, 116.0f, 28.0f }
+    };
+
+    const float sy = static_cast<float> (getHeight()) / static_cast<float> (referenceHeight);
+    const float topValFont = juce::jmax (10.0f, 24.5f * sy);
+    const float botValFont = juce::jmax (8.5f, 19.5f * sy);
+
+    for (size_t i = 0; i < 10; ++i)
     {
-        const auto& r=refs[(size_t)i];
-        sliders[(size_t)i]->setBounds(scaledBounds((float)r.getX(),(float)r.getY(),(float)r.getWidth(),(float)r.getHeight()));
+        values[i].setBounds (scaledBounds (valueRefs[i][0], valueRefs[i][1], valueRefs[i][2], valueRefs[i][3]));
+        values[i].setFont (juce::Font (juce::FontOptions (i < 4 ? topValFont : botValFont)));
     }
 
-    const std::array<juce::Rectangle<int>,10> valueRefs {{
-        {95,425,105,22},{315,425,115,22},{1570,425,120,22},{1790,425,110,22},
-        {145,672,115,20},{390,672,115,20},{690,672,115,20},{990,672,115,20},
-        {1360,638,145,24},{1725,638,150,24}
-    }};
-    for(int i=0;i<10;++i) values[(size_t)i].setBounds(scaledBounds((float)valueRefs[(size_t)i].getX(),
-        (float)valueRefs[(size_t)i].getY(),(float)valueRefs[(size_t)i].getWidth(),(float)valueRefs[(size_t)i].getHeight()));
+    prevPresetButton.setBounds  (scaledBounds ( 714.0f, 74.0f,  80.0f, 58.0f));
+    presetTitleButton.setBounds (scaledBounds ( 794.0f, 74.0f, 442.0f, 58.0f));
+    nextPresetButton.setBounds  (scaledBounds (1236.0f, 74.0f,  80.0f, 58.0f));
 
-    presetSelector.setBounds(scaledBounds(708,74,598,58));
-    const std::array<juce::Rectangle<int>,5> modeRefs {{
-        {560,474,175,53},{740,474,175,53},{920,474,175,53},{1100,474,175,53},{1280,474,175,53}
-    }};
-    for(int i=0;i<5;++i) modeButtons[(size_t)i].setBounds(scaledBounds(
-        (float)modeRefs[(size_t)i].getX(),(float)modeRefs[(size_t)i].getY(),
-        (float)modeRefs[(size_t)i].getWidth(),(float)modeRefs[(size_t)i].getHeight()));
-    abButtons[0].setBounds(scaledBounds(1730,74,80,58));
-    abButtons[1].setBounds(scaledBounds(1810,74,80,58));
-    for(int i=0;i<10;++i)
-        sliders[(size_t)i]->onValueChange = [this] { updateValueLabels(); };
+    const float slotW = 918.0f / 5.0f;
+    for (size_t i = 0; i < 5; ++i)
+        modeButtons[i].setBounds (scaledBounds (556.0f + static_cast<float> (i) * slotW + 3.0f, 469.0f, slotW - 6.0f, 64.0f));
+
+    abButtons[0].setBounds   (scaledBounds (1741.0f, 74.0f, 78.0f, 58.0f));
+    abButtons[1].setBounds   (scaledBounds (1819.0f, 74.0f, 78.0f, 58.0f));
+    settingsButton.setBounds (scaledBounds (1924.0f, 74.0f, 58.0f, 58.0f));
 }

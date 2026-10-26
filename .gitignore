@@ -1,0 +1,7 @@
+build/
+cmake-build-*/
+Releases/
+.DS_Store
+*.user
+*.suo
+*.VC.db

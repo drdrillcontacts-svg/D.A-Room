@@ -1,29 +1,32 @@
-# DAroom — VST3 / AU starter project
+# D.A Room — Algorithmic Reverb Plugin (VST3 & AU)
 
-DAroom is an original JUCE-based algorithmic reverb plugin starter with the selected 653 × 184 px GUI reference embedded in the build. The interface uses the supplied artwork as its background and places interactive parameter controls and a 36-preset browser over the corresponding hit areas.
+**D.A Room** by **D.A Production** is a C++17 / JUCE 8.0.6 stereo algorithmic reverb plugin featuring a custom high-DPI interface (`2030 × 775` reference canvas), 50 categorized factory presets, A/B state comparison, `.drpreset` file import/export, and a custom frameless Windows x64 `.exe` installer.
 
-## Included
-- C++17 + JUCE 8.0.6 project
-- VST3, AU (macOS), and Standalone formats
-- Mix, Predelay, Decay, Size and reverb mode parameters
-- Parameter state save/restore
-- 36 factory presets across room, hall, plate, chamber and ambience spaces
-- Individual editable `.drpreset` preset files in `Presets/`
-- GitHub Actions workflow for macOS and Windows builds
-- Exact GUI reference at `Assets/DAroom_UI_Reference.png`
+## Features
+- **Formats**:
+  - **Windows 64-bit VST3** (`D.A Room.vst3`, static MSVC runtime — zero external DLL dependencies)
+  - **macOS Universal 2 AU & VST3** (`D.A Room.component` & `D.A Room.vst3` for Apple Silicon `arm64` + Intel `x86_64`)
+  - **Custom Windows x64 `.EXE` Installer** (`D.A Production Installer.exe` installing to `C:\Program Files\Common Files\VST3`)
+- **DSP Architecture**:
+  - Click-free smoothed fractional-delay Predelay (`0–250 ms`)
+  - 4-stage stereo prime-ratio Schroeder allpass input diffuser (`Diffusion`)
+  - 5 acoustic space voicings (`Room`, `Hall`, `Plate`, `Chamber`, `Ambience`) with perceptual `Decay` (`0.20–12.00 s`) and `Size` (`10–100%`)
+  - Quadrature 90° stereo chorus modulation (`Modulation`)
+  - Zero-allocation TPT 12 dB/oct Low Cut (`20–1000 Hz`) & High Cut (`2–20 kHz`) filters
+  - Smoothed M/S Stereo Width (`0–100%`) and equal-power Wet/Dry Mix (`0–100%`)
+  - Full `Mono -> Mono`, `Mono -> Stereo`, and `Stereo -> Stereo` bus support
+- **Presets & Workflow**:
+  - 50 factory presets across Room, Hall, Plate, Chamber, and Ambience categories
+  - Persistent A/B state comparison & `.drpreset` JSON preset load/save
 
-## Important quality note
-This is a functional first implementation, not a claim of parity with ValhallaRoom. It uses JUCE's built-in stereo reverb as a starting point plus a predelay buffer. Matching a mature commercial reverb requires substantial DSP design, listening tests, CPU optimization, parameter smoothing, and validation across sample rates and DAWs.
-
-## Build locally
-Install CMake, a C++ toolchain, and Git. Then:
+## Build Locally
 
 ```bash
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build --config Release
+# macOS (Universal AU + VST3)
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --config Release --target DAroom_AU DAroom_VST3
+
+# Windows x64 (VST3 + Custom EXE Installer)
+cmake -S . -B build -A x64
+cmake --build build --config Release --target DAroom_VST3 DA_Production_Installer
 ```
-
-On macOS, CMake builds VST3 and AU targets. AU is only available on Apple platforms.
-
-## GitHub Actions
-Push the project to GitHub. The workflow builds on macOS and Windows and uploads artifacts. For macOS AU validation, use a Mac runner; a Windows runner cannot build AU.

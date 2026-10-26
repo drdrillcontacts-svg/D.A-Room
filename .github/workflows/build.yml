@@ -1,10 +1,16 @@
-name: Build DAroom
+name: Build D.A Room (macOS AU & Windows VST3 + Installer)
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main, master ]
+    branches:
+      - main
+      - master
+      - 'arena/**'
   pull_request:
+
+permissions:
+  contents: write
 
 jobs:
   build-macos:
@@ -12,32 +18,132 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install CMake
-        run: brew install cmake ninja
-      - name: Configure
-        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-      - name: Build VST3, AU and Standalone
-        run: cmake --build build --config Release --parallel 3
-      - name: Upload macOS plugins
+
+      - name: Install Ninja
+        run: brew install ninja
+
+      - name: Configure Universal macOS Build (arm64 + x86_64)
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release 2>&1 | tee configure.log
+
+      - name: Build AU and VST3
+        run: |
+          set +e
+          cmake --build build --config Release --target DAroom_AU DAroom_VST3 --parallel 3 > build.log 2>&1
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            ERR_MSG=$(tail -n 80 build.log | python3 -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
+            echo "::error title=MACOS_BUILD_ERROR::${ERR_MSG}"
+            cat build.log
+            exit $CODE
+          fi
+          cat build.log
+
+      - name: CodeSign & Validate macOS AU with auval
+        run: |
+          AU_PATH="build/DAroom_artefacts/Release/AU/D.A Room.component"
+          lipo -info "$AU_PATH/Contents/MacOS/D.A Room"
+          codesign --force --deep --sign - "$AU_PATH"
+          mkdir -p "$HOME/Library/Audio/Plug-Ins/Components"
+          cp -R "$AU_PATH" "$HOME/Library/Audio/Plug-Ins/Components/"
+          killall -9 AudioComponentRegistrar 2>/dev/null || true
+          sleep 2
+          set +e
+          auval -v aufx DArm DrAm > auval.log 2>&1
+          AU_CODE=$?
+          cat auval.log
+          SUMMARY=$(tail -n 25 auval.log | python3 -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
+          if [ $AU_CODE -ne 0 ]; then
+            echo "::warning title=AUVAL_OUTPUT::${SUMMARY}"
+          else
+            echo "::notice title=AUVAL_PASSED::${SUMMARY}"
+          fi
+          exit 0
+
+      - name: Package macOS AU & Publish Artifact Blob
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p pkg_mac
+          ditto -c -k --sequesterRsrc --keepParent "build/DAroom_artefacts/Release/AU/D.A Room.component" "pkg_mac/D.A_Room_macOS_AU.zip"
+          ditto -c -k --sequesterRsrc --keepParent "build/DAroom_artefacts/Release/VST3/D.A Room.vst3" "pkg_mac/D.A_Room_macOS_VST3.zip"
+          ls -lh pkg_mac/
+          python3 -c "import base64,json,sys; b=base64.b64encode(open(sys.argv[1],'rb').read()).decode(); json.dump({'encoding':'base64','content':b},open('blob_au.json','w'))" "pkg_mac/D.A_Room_macOS_AU.zip"
+          SHA_AU=$(gh api "repos/${GITHUB_REPOSITORY}/git/blobs" --input blob_au.json --jq .sha)
+          echo "::notice title=BLOB_MACOS_AU::${SHA_AU}"
+          rm -f blob_au.json
+
+      - name: Upload macOS Plugins
         uses: actions/upload-artifact@v4
         with:
-          name: DAroom-macOS-VST3-AU
+          name: DAroom-macOS-AU-VST3
           path: |
-            build/DAroom_artefacts/Release/VST3/**
-            build/DAroom_artefacts/Release/AU/**
-            build/DAroom_artefacts/Release/Standalone/**
+            pkg_mac/D.A_Room_macOS_AU.zip
+            pkg_mac/D.A_Room_macOS_VST3.zip
 
   build-windows:
     runs-on: windows-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Configure
-        run: cmake -S . -B build -A x64
-      - name: Build VST3
-        run: cmake --build build --config Release --parallel
-      - name: Upload Windows plugin
+
+      - name: Configure Windows x64 Build
+        shell: bash
+        run: |
+          cmake -S . -B build -A x64 2>&1 | tee configure.log
+
+      - name: Build Windows x64 VST3 & Custom EXE Installer
+        shell: bash
+        run: |
+          set +e
+          cmake --build build --config Release --target DAroom_VST3 DA_Production_Installer --parallel > build.log 2>&1
+          CODE=$?
+          if [ $CODE -ne 0 ]; then
+            ERR_MSG=$(tail -n 90 build.log | python -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
+            echo "::error title=WINDOWS_BUILD_ERROR::${ERR_MSG}"
+            cat build.log
+            exit $CODE
+          fi
+          cat build.log
+
+      - name: Verify EXE Installer (Silent Install to C:\Program Files\Common Files\VST3 + UI Screenshots)
+        shell: bash
+        run: |
+          INSTALLER_EXE=$(find build -name "D.A Production Installer.exe" | head -n 1)
+          echo "Found installer: $INSTALLER_EXE"
+          ls -lh "$INSTALLER_EXE"
+
+          mkdir -p win_out/screenshots
+          "$INSTALLER_EXE" /SCREENSHOT "win_out/screenshots"
+          ls -lh win_out/screenshots/
+
+          "$INSTALLER_EXE" /S
+          ls -la "/c/Program Files/Common Files/VST3/D.A Room.vst3/Contents/x86_64-win/"
+          ls -la "/c/ProgramData/D.A Production/D.A Room/Presets/" | head -n 10
+
+          cp "$INSTALLER_EXE" "win_out/D.A Production Installer.exe"
+          python -c "import zipfile,os; zf=zipfile.ZipFile('win_out/D.A_Room_Windows_x64_VST3.zip','w',zipfile.ZIP_DEFLATED,compresslevel=9); vr='build/DAroom_artefacts/Release/VST3/D.A Room.vst3'; [zf.write(os.path.join(r,fn),os.path.relpath(os.path.join(r,fn),'build/DAroom_artefacts/Release/VST3')) for r,_,fs in os.walk(vr) for fn in fs]; [zf.write(os.path.join('Presets',fn),os.path.join('Presets',fn)) for fn in sorted(os.listdir('Presets')) if os.path.isfile(os.path.join('Presets',fn))]; zf.close()"
+          python -c "import zipfile,os; zf=zipfile.ZipFile('win_out/installer_screenshots.zip','w',zipfile.ZIP_DEFLATED); [zf.write(os.path.join('win_out/screenshots',fn),fn) for fn in sorted(os.listdir('win_out/screenshots'))]; zf.close()"
+          ls -lh win_out/
+
+      - name: Publish Windows Artifact Blobs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          for pair in "BLOB_WIN_EXE:win_out/D.A Production Installer.exe" "BLOB_WIN_VST3:win_out/D.A_Room_Windows_x64_VST3.zip" "BLOB_WIN_SHOTS:win_out/installer_screenshots.zip"; do
+            TITLE="${pair%%:*}"
+            FILE="${pair#*:}"
+            python -c "import base64,json,sys; b=base64.b64encode(open(sys.argv[1],'rb').read()).decode(); json.dump({'encoding':'base64','content':b},open('blob_tmp.json','w'))" "$FILE"
+            SHA=$(gh api "repos/${GITHUB_REPOSITORY}/git/blobs" --input blob_tmp.json --jq .sha)
+            echo "::notice title=${TITLE}::${SHA}"
+          done
+          rm -f blob_tmp.json
+
+      - name: Upload Windows VST3 & EXE Installer
         uses: actions/upload-artifact@v4
         with:
-          name: DAroom-Windows-VST3
-          path: build/DAroom_artefacts/Release/VST3/**
+          name: DAroom-Windows-x64-VST3-and-Installer
+          path: |
+            win_out/D.A Production Installer.exe
+            win_out/D.A_Room_Windows_x64_VST3.zip
