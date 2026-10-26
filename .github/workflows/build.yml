@@ -12,9 +12,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-macos:
     runs-on: macos-14
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -83,6 +88,7 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -114,10 +120,10 @@ jobs:
           ls -lh "$INSTALLER_EXE"
 
           mkdir -p win_out/screenshots
-          "$INSTALLER_EXE" /SCREENSHOT "win_out/screenshots"
+          MSYS_NO_PATHCONV=1 "$INSTALLER_EXE" --screenshot "win_out/screenshots"
           ls -lh win_out/screenshots/
 
-          "$INSTALLER_EXE" /S
+          MSYS_NO_PATHCONV=1 "$INSTALLER_EXE" --silent
           ls -la "/c/Program Files/Common Files/VST3/D.A Room.vst3/Contents/x86_64-win/"
           ls -la "/c/ProgramData/D.A Production/D.A Room/Presets/" | head -n 10
 

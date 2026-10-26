@@ -1105,7 +1105,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow)
             {
                 gApp.vst3InstallDir = arg.substr(5);
             }
-            else if (arg == L"/SCREENSHOT" && (i + 1) < argc)
+            else if (arg.rfind(L"--dir=", 0) == 0)
+            {
+                gApp.vst3InstallDir = arg.substr(6);
+            }
+            else if ((arg == L"/SCREENSHOT" || arg == L"--screenshot" || arg == L"-screenshot") && (i + 1) < argc)
             {
                 screenshotDir = argv[++i];
             }
