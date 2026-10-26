@@ -83,10 +83,6 @@ void DARoomLookAndFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int w
 {
     const auto area = juce::Rectangle<float> (static_cast<float> (x), static_cast<float> (y),
                                               static_cast<float> (width), static_cast<float> (height));
-    // Cover baked-in track cleanly with bottom panel dark tone
-    g.setColour (juce::Colour (0xff050c12));
-    g.fillRoundedRectangle (area.expanded (2.0f, 0.0f), 3.0f);
-
     const float cy = area.getCentreY();
     const float pad = juce::jmax (5.0f, area.getHeight() * 0.32f);
     const float x0 = area.getX() + pad;
@@ -130,8 +126,11 @@ void DARoomLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b
 
     if (id == "presetCenter")
     {
-        g.setColour (juce::Colour (isHighlighted ? 0xf2091924 : 0xee061119));
-        g.fillRect (bounds.reduced (1.0f, 3.0f));
+        if (isHighlighted || isDown)
+        {
+            g.setColour (juce::Colour (isDown ? 0x2c6ce0ff : 0x186ce0ff));
+            g.fillRect (bounds.reduced (2.0f, 3.0f));
+        }
         return;
     }
 
@@ -139,15 +138,15 @@ void DARoomLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b
     {
         if (button.getToggleState())
         {
-            juce::ColourGradient activeGrad (juce::Colour (0x44165a75), bounds.getCentreX(), bounds.getY(),
-                                             juce::Colour (0x88134d66), bounds.getCentreX(), bounds.getBottom(), false);
+            juce::ColourGradient activeGrad (juce::Colour (0x2416607d), bounds.getCentreX(), bounds.getY(),
+                                             juce::Colour (0x6e14536e), bounds.getCentreX(), bounds.getBottom(), false);
             g.setGradientFill (activeGrad);
-            g.fillRoundedRectangle (bounds.reduced (2.0f, 3.0f), 7.0f);
+            g.fillRoundedRectangle (bounds.reduced (2.5f, 2.5f), 8.0f);
         }
         else if (isHighlighted)
         {
-            g.setColour (juce::Colour (0x2456bce0));
-            g.fillRoundedRectangle (bounds.reduced (2.0f, 3.0f), 7.0f);
+            g.setColour (juce::Colour (0x2056bce0));
+            g.fillRoundedRectangle (bounds.reduced (2.5f, 2.5f), 8.0f);
         }
         return;
     }
@@ -156,13 +155,13 @@ void DARoomLookAndFeel::drawButtonBackground (juce::Graphics& g, juce::Button& b
     {
         if (button.getToggleState())
         {
-            g.setColour (juce::Colour (0xcc0f384a));
-            g.fillRoundedRectangle (bounds.reduced (2.0f), 8.0f);
+            g.setColour (juce::Colour (0x98114054));
+            g.fillRoundedRectangle (bounds.reduced (2.5f), 7.0f);
         }
-        else
+        else if (isHighlighted)
         {
-            g.setColour (juce::Colour (isHighlighted ? 0xbb0a1d28 : 0xd8061018));
-            g.fillRoundedRectangle (bounds.reduced (2.0f), 8.0f);
+            g.setColour (juce::Colour (0x2456bce0));
+            g.fillRoundedRectangle (bounds.reduced (2.5f), 7.0f);
         }
         return;
     }
@@ -176,19 +175,19 @@ void DARoomLookAndFeel::drawButtonText (juce::Graphics& g, juce::TextButton& but
         return; // Uses artwork icon (<, >, gear) directly
 
     const auto bounds = button.getLocalBounds();
-    const float fontH = juce::jmax (10.5f, static_cast<float> (bounds.getHeight()) * (id == "presetCenter" ? 0.50f : 0.44f));
+    const float fontH = juce::jmax (10.5f, static_cast<float> (bounds.getHeight()) * (id == "presetCenter" ? 0.50f : 0.42f));
     g.setFont (juce::Font (juce::FontOptions (fontH)));
 
     if (id == "presetCenter")
     {
-        g.setColour (isHighlighted ? juce::Colour (0xffffffff) : juce::Colour (0xffe8f7ff));
+        g.setColour (isHighlighted ? juce::Colour (0xffffffff) : juce::Colour (0xffeaf8ff));
         g.drawFittedText (button.getButtonText(), bounds.reduced (8, 2), juce::Justification::centred, 1);
         return;
     }
 
     const bool active = button.getToggleState();
-    g.setColour (active ? juce::Colour (0xff9ceaff)
-                        : (isHighlighted ? juce::Colour (0xffd5eef8) : juce::Colour (0xff93b4c4)));
+    g.setColour (active ? juce::Colour (0xffb8f2ff)
+                        : (isHighlighted ? juce::Colour (0xffd8f0fa) : juce::Colour (0xff9ab9c9)));
     g.drawFittedText (button.getButtonText(), bounds.reduced (4, 2), juce::Justification::centred, 1);
 }
 
@@ -674,56 +673,15 @@ void DARoomAudioProcessorEditor::paint (juce::Graphics& g)
         g.drawImage (background, getLocalBounds().toFloat());
     }
 
-    // Cover baked-in value readouts at exact measured reference coordinates
-    static constexpr float readoutBoxes[10][4] = {
-        {   91.0f, 437.0f, 110.0f, 30.0f }, // MIX
-        {  324.0f, 437.0f, 120.0f, 30.0f }, // PREDELAY
-        { 1590.0f, 437.0f, 120.0f, 30.0f }, // DECAY
-        { 1827.0f, 437.0f, 110.0f, 30.0f }, // SIZE
-        {  195.0f, 679.0f, 110.0f, 26.0f }, // DIFFUSION
-        {  495.0f, 679.0f, 110.0f, 26.0f }, // MODULATION
-        {  800.0f, 679.0f, 110.0f, 26.0f }, // DAMPING
-        { 1095.0f, 679.0f, 110.0f, 26.0f }, // WIDTH
-        { 1395.0f, 637.0f, 112.0f, 28.0f }, // LOW CUT
-        { 1758.0f, 637.0f, 118.0f, 28.0f }  // HIGH CUT
-    };
-
-    for (size_t i = 0; i < 10; ++i)
-    {
-        g.setColour (i < 4 ? juce::Colour (0xf4040a10) : juce::Colour (0xf6050c12));
-        g.fillRoundedRectangle (scaledFloatBounds (readoutBoxes[i][0], readoutBoxes[i][1],
-                                                   readoutBoxes[i][2], readoutBoxes[i][3]),
-                                3.0f);
-    }
-
-    // Cover baked-in CHAMBER bottom glow & render live mode pill + dynamic cyan underline glow
-    g.setColour (juce::Colour (0xf4040a10));
-    g.fillRoundedRectangle (scaledFloatBounds (1055.0f, 528.0f, 265.0f, 28.0f), 4.0f);
-
-    const auto pillRect = scaledFloatBounds (556.0f, 466.0f, 918.0f, 70.0f);
-    g.setColour (juce::Colour (0xec050e16));
-    g.fillRoundedRectangle (pillRect, pillRect.getHeight() * 0.25f);
-    g.setColour (juce::Colour (0x66306e88));
-    g.drawRoundedRectangle (pillRect, pillRect.getHeight() * 0.25f, 1.0f);
-
-    // Subtle vertical dividers between the 5 modes
-    g.setColour (juce::Colour (0x334788a3));
-    for (int d = 1; d < 5; ++d)
-    {
-        const float dx = 556.0f + static_cast<float> (d) * (918.0f / 5.0f);
-        const auto lineBounds = scaledFloatBounds (dx, 480.0f, 1.0f, 42.0f);
-        g.drawVerticalLine (juce::roundToInt (lineBounds.getX()), lineBounds.getY(), lineBounds.getBottom());
-    }
-
     // Dynamic active cyan glow bar under the active reverb mode
     const int activeMode = juce::jlimit (0, 4, audioProcessor.getMode());
-    const float slotW = 918.0f / 5.0f;
+    const float slotW = 919.0f / 5.0f;
     const float glowX = 556.0f + static_cast<float> (activeMode) * slotW + slotW * 0.16f;
     const float glowW = slotW * 0.68f;
-    const auto glowBar = scaledFloatBounds (glowX, 533.0f, glowW, 3.5f);
+    const auto glowBar = scaledFloatBounds (glowX, 533.5f, glowW, 3.2f);
     g.setColour (juce::Colour (0x445cd9ff));
     g.fillRoundedRectangle (glowBar.expanded (4.0f, 2.5f), 3.0f);
-    g.setColour (juce::Colour (0xff8ce8ff));
+    g.setColour (juce::Colour (0xff90ebff));
     g.fillRoundedRectangle (glowBar, 1.8f);
 }
 
@@ -738,7 +696,7 @@ void DARoomAudioProcessorEditor::resized()
         { 1799.0f, 222.0f, 166.0f, 166.0f }, // SIZE
         {   67.0f, 560.0f, 122.0f, 122.0f }, // DIFFUSION
         {  381.0f, 560.0f, 122.0f, 122.0f }, // MODULATION
-        {  679.0f, 560.0f, 122.0f, 122.0f }, // WIDTH/DAMPING
+        {  679.0f, 560.0f, 122.0f, 122.0f }, // DAMPING
         {  978.0f, 560.0f, 122.0f, 122.0f }, // WIDTH
         { 1280.0f, 575.0f,  92.0f,  92.0f }, // LOW CUT KNOB
         { 1634.0f, 575.0f,  92.0f,  92.0f }  // HIGH CUT KNOB
@@ -777,11 +735,11 @@ void DARoomAudioProcessorEditor::resized()
     presetTitleButton.setBounds (scaledBounds ( 794.0f, 74.0f, 442.0f, 58.0f));
     nextPresetButton.setBounds  (scaledBounds (1236.0f, 74.0f,  80.0f, 58.0f));
 
-    const float slotW = 918.0f / 5.0f;
+    const float slotW = 919.0f / 5.0f;
     for (size_t i = 0; i < 5; ++i)
-        modeButtons[i].setBounds (scaledBounds (556.0f + static_cast<float> (i) * slotW + 3.0f, 469.0f, slotW - 6.0f, 64.0f));
+        modeButtons[i].setBounds (scaledBounds (556.0f + static_cast<float> (i) * slotW + 3.0f, 466.0f, slotW - 6.0f, 68.0f));
 
-    abButtons[0].setBounds   (scaledBounds (1741.0f, 74.0f, 78.0f, 58.0f));
-    abButtons[1].setBounds   (scaledBounds (1819.0f, 74.0f, 78.0f, 58.0f));
+    abButtons[0].setBounds   (scaledBounds (1741.0f, 74.0f, 78.0f, 59.0f));
+    abButtons[1].setBounds   (scaledBounds (1819.0f, 74.0f, 78.0f, 59.0f));
     settingsButton.setBounds (scaledBounds (1924.0f, 74.0f, 58.0f, 58.0f));
 }

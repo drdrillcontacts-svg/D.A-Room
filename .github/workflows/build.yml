@@ -127,7 +127,8 @@ jobs:
           mkdir -p win_out/screenshots
 
           VERIFY_EXE=$(find build -name "VerifyPluginGUI.exe" | head -n 1)
-          echo "Running GUI verifier: $VERIFY_EXE"
+          echo "Running DSP & GUI verifier: $VERIFY_EXE"
+          set -o pipefail
           MSYS_NO_PATHCONV=1 "$VERIFY_EXE" "win_out/screenshots/plugin_gui_windows.png" 2>&1 | tee gui_verify.log
           GUI_MSG=$(cat gui_verify.log | python -c "import sys; s=sys.stdin.read(); print(s.replace('%','%25').replace('\r','%0D').replace('\n','%0A'))")
           echo "::notice title=WIN_GUI_VERIFIED::${GUI_MSG}"
